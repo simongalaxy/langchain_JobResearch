@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from tools.JobPosting import JobPosting
-from tools.markdownProcesser import markdown_to_text
+from tools.DataProcesser import markdown_to_text
 
 
 class jobExtractor:
@@ -17,6 +17,10 @@ class jobExtractor:
 
     # Extract structured job data from unstructured job description using LLM.
     def extract_info_from_jobAd(self, job_content: str) -> str:
+        
+        self.logger.info(f"Original job content:")
+        self.logger.info(job_content)
+        self.logger.info("--------start LLM extraction-----------")
         
         schema = JobPosting.model_json_schema()
         extraction_prompt = f"""
@@ -34,29 +38,19 @@ class jobExtractor:
         """
 
         response = self.llm.invoke(extraction_prompt)
-        
-        self.logger.info("Job content:")
-        self.logger.info(job_content)
-        self.logger.info("\n")
-
-        if response.startswith("```json"):
-            data = response.replace("```json", "").replace("```", "")
-        else:
-            data = response
-            
-        return json.loads(data)
+        self.logger.info(f"Extracted Job Info - Data type: {type(response)}:")
+        self.logger.info(response)
+        self.logger.info("-"*100)
+          
+        return response
+    
     
     def process_jobAds(self, jobAds, keyword: str) -> list[JobPosting]:
         
-        jobs = []
+        jobInfos = []
         for i, jobAd in enumerate(jobAds):
             
-            extracted_data = self.extract_info_from_jobAd(job_content=markdown_to_text(jobAd))
-            job = JobPosting.model_validate(extracted_data)
-            updated_job = job.model_copy(update={"url": jobAd.url, "keyword": keyword})
-            self.logger.info(f"No. {i}: ")
-            self.logger.info(updated_job)
-            self.logger.info("-"*100)
-            jobs.append(updated_job)
+            extracted_data = self.extract_info_from_jobAd(job_content=jobAd.markdown)
+            jobInfos.append(extracted_data)
         
-        return jobs
+        return jobInfos

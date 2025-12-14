@@ -6,7 +6,7 @@ load_dotenv()
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
 from tools.jobExtractor import jobExtractor
-
+from tools.DataProcesser import remove_duplicates_by_id
 
 
 # main program.
@@ -33,13 +33,25 @@ def main():
         logger.info(f"keyword input: {keyword}")
         
         # search and crawl jobs by keyword.
-        jobAds = asyncio.run(crawler.crawl(keyword=keyword))
+        # jobAds = asyncio.run(crawler.crawl(keyword=keyword))
+        results = asyncio.run(crawler.concurrent_crawling(keyword=keyword))
         
-        # extract information from jobAds.
-        jobPosts = extractor.process_jobAds(
-            jobAds=jobAds, 
-            keyword=keyword
-        )
+        for i, result in enumerate(results):
+            print(f"No. {i} - Data Type: {type(result)}")
+            for item in result:
+                print(f"data type of items under result: {type(item)}")
+                print(item.url)
+        
+        # # remove duplicate job advertisement.
+        # unique_jobAds = remove_duplicates_by_id(jobAds=jobAds)
+        # logger.info(f"Total no. of jobAd (unique): {len(unique_jobAds)}")
+    
+        
+        # # extract information from jobAds.
+        # jobInfos = extractor.process_jobAds(
+        #     jobAds=jobAds, 
+        #     keyword=keyword
+        # )
 
 
 # main program entry point.
