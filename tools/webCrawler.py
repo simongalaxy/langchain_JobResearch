@@ -13,7 +13,7 @@ class WebCrawler:
         self.filter_chain = FilterChain(filters=[self.url_filter])
         self.crawl_config = CrawlerRunConfig(
                 deep_crawl_strategy=BFSDeepCrawlStrategy(
-                            max_depth=2,  # Reduced depth for faster crawling
+                            max_depth=1,  # Reduced depth for faster crawling
                             include_external=False,
                             filter_chain=self.filter_chain,
                         ),
@@ -47,7 +47,7 @@ class WebCrawler:
         async with AsyncWebCrawler(config=self.browser_cfg) as crawler:
             urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, 10)]
             tasks = [crawler.arun(url=url, config=self.crawl_config) for url in urls]
-            results = await asyncio.gather(*tasks)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
             
             self.logger.info(f"WebCrawler: Total {len(results)} were crawled for keyword - {keyword}.")
             
