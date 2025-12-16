@@ -1,26 +1,12 @@
-from sqlmodel import SQLModel, Field, Column, JSON
-from typing import Optional, List
+from pydantic import BaseModel
+from typing import List, Optional
 
-class JobPosting(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    job_id: Optional[str] =None
-    job_title: Optional[str] = None
-    responsibilities: List[str] = Field(
-        default_factory=list,
-        sa_column=Column(JSON, nullable=False)
-    )
-    requirements: List[str] = Field(
-        default_factory=list,
-        sa_column=Column(JSON, nullable=False)
-    )
-    skills: List[str] = Field(
-        default_factory=list,
-        sa_column=Column(JSON, nullable=False)
-    )
-    company: Optional[str] = None
-    location: Optional[str] = None
-    salary: Optional[str] = None
-    keyword: Optional[str] = None
-    url: Optional[str] = Field(default=None, unique=True, index=True)
-    job_content: Optional[str] = None
-    
+
+class JobPosting(BaseModel):
+    job_title: str
+    company: Optional[str]
+    responsibilities: List[str]
+    requirements: List[str]
+    salary: Optional[str]
+    working_location: Optional[str]
+    experiences: Optional[str]
