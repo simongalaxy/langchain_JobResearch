@@ -8,18 +8,17 @@ def markdown_to_text(result) -> str:
     return plain_text.strip()
 
 
-def remove_duplicates_by_id(jobAds) -> list[dict]:
+def get_unique_jobAds_by_id(jobAds):
     
     seen = set()
     unique_jobAds = []
+    
     for job in jobAds:
         job_id = job.url.split("?")[0].split("/")[-1]
         if job_id not in seen:
             seen.add(job_id)
-            dict = {
-                "job_id": job_id,
-                "jobAd": job
-            }
-            unique_jobAds.append(dict)
+            unique_jobAds.append(job)
     
     return unique_jobAds
+
+

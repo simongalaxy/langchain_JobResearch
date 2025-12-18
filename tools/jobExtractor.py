@@ -8,12 +8,13 @@ load_dotenv()
 
 from tools.JobPosting import JobPosting
 from tools.DataProcesser import markdown_to_text
-
+from pprint import pformat
 
 class jobExtractor:
     def __init__(self, logger):
         self.logger = logger
         self.llm = OllamaLLM(model=os.getenv("OLLAMA_EXTRACTION_MODEL"))
+        self.logger.info("JobExtractor has been initiatied.")
 
     # Extract structured job data from unstructured job description using LLM.
     def extract_info_from_jobAd(self, job_content: str) -> str:
@@ -39,18 +40,9 @@ class jobExtractor:
 
         response = self.llm.invoke(extraction_prompt)
         self.logger.info(f"Extracted Job Info - Data type: {type(response)}:")
-        self.logger.info(response)
+        self.logger.info(f"Data: \n%s", pformat(response))
         self.logger.info("-"*100)
           
         return response
     
-    
-    def process_jobAds(self, jobAds, keyword: str) -> list[JobPosting]:
         
-        jobInfos = []
-        for i, jobAd in enumerate(jobAds):
-            
-            extracted_data = self.extract_info_from_jobAd(job_content=jobAd.markdown)
-            jobInfos.append(extracted_data)
-        
-        return jobInfos

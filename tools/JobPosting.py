@@ -10,3 +10,6 @@ class JobPosting(BaseModel):
     salary: Optional[str]
     working_location: Optional[str]
     experiences: Optional[str]
+    job_id: Optional[str]
+    job_url: Optional[str]
+    markdown: Optional[str]
