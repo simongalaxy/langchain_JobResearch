@@ -1,15 +1,17 @@
-import asyncio
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LLMConfig, LLMExtractionStrategy, CacheMode, BrowserConfig
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
 from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
 from crawl4ai.deep_crawling.filters import URLPatternFilter, FilterChain
 
+import asyncio
+from pprint import pformat
 from typing import List
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 from tools.JobPosting import JobPosting
+from tools.DataProcesser import get_unique_jobAds_by_id, markdown_to_text
 
 class WebCrawler:
     def __init__(self, logger):
@@ -58,7 +60,40 @@ class WebCrawler:
                 config=self.crawl_config
             )
                 
-        return result # to remove the first search result page.
+        return result 
     
 
-
+    def get_unique_jobAds(self, urls: list[str]):
+        # crawl all jobAds from urls.
+        unique_jobAds = []
+        seen = set()
+        count = 0
+        for url in urls:
+            self.logger.info(f"Start crawl search page - url: {url}")
+            results = asyncio.run(self.crawl(url=url))
+            
+            unique_jobAds_per_url = get_unique_jobAds_by_id(jobAds=results)
+            total_unique_jobAds_per_url = len(unique_jobAds_per_url)
+            
+            if total_unique_jobAds_per_url == 1: # break the loop when no search results.
+                break
+            else:
+                # save jobAds to list.
+                count +=1
+                for job in unique_jobAds_per_url:
+                    job_id = job.url.split("?")[0].split("/")[-1]
+                    if job_id not in seen:
+                        seen.add(job_id)
+                        dict = {
+                            "jobId": job_id,
+                            "url": job.url,
+                            "markdown": job.markdown
+                        }
+                        unique_jobAds.append(dict)
+                        self.logger.info("jobAd: \n%s", pformat(dict))
+        
+        self.logger.info(f"Total no. of unique jobAds crawled from {count} search urls: {len(unique_jobAds)}.")
+        
+        return unique_jobAds[1:] # for remove the first search page.   
+        
+        

@@ -19,6 +19,7 @@ def main():
     extractor = jobExtractor(logger=logger)
     
     
+    
     # chat loop.
     while True:
         keyword = input("Enter your keyword to search jobs (or type 'q' for quit): ")
@@ -29,44 +30,16 @@ def main():
         logger.info(f"keyword input: {keyword}")
         
         # generate the search page urls for specific keyword.
-        total_page=20
+        total_page=2
         urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
         logger.info(f"total {len(urls)} urls: {urls}")
-
-        # crawl all jobAds from urls.
-        unique_jobAds = []
-        seen = set()
-        count = 0
-        for url in urls:
-            logger.info(f"Start crawl search page - url: {url}")
-            results = asyncio.run(crawler.crawl(url=url))
-            
-            unique_jobAds_per_url = get_unique_jobAds_by_id(jobAds=results)
-            total_unique_jobAds_per_url = len(unique_jobAds_per_url)
-            
-            if total_unique_jobAds_per_url == 1: # break the loop when no search results.
-                break
-            else:
-                # save jobAds to list.
-                count +=1
-                for job in unique_jobAds_per_url:
-                    job_id = job.url.split("?")[0].split("/")[-1]
-                    if job_id not in seen:
-                        seen.add(job_id)
-                        dict = {
-                            "jobId": job_id,
-                            "url": job.url,
-                            "markdown": job.markdown
-                        }
-                        unique_jobAds.append(dict)
-                        logger.info("jobAd: \n%s", pformat(dict))
+        unique_jobAds = crawler.get_unique_jobAds(urls=urls)
         
-        logger.info(f"Total no. of unique jobAds crawled from {count} search urls: {len(unique_jobAds)}.")
-                
-        for i, job in enumerate(unique_jobAds[1:], start=1):
+        # extract information from jobad and then chunk and embed to chromaDB.
+        for i, job in enumerate(unique_jobAds):
             logger.info(f"{i}:")
             extracted_json = extractor.extract_info_from_jobAd(job_content=job["markdown"])
-           
+
             
     return
 
