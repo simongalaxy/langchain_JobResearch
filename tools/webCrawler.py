@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from tools.JobPosting import JobPosting
-from tools.DataProcesser import get_unique_jobAds_by_id, markdown_to_text
+from tools.DataProcesser import get_unique_jobAds_by_id, get_job_id
 
 class WebCrawler:
     def __init__(self, logger):
@@ -67,7 +67,7 @@ class WebCrawler:
         # crawl all jobAds from urls.
         unique_jobAds = []
         seen = set()
-        count = 0
+       
         for url in urls:
             self.logger.info(f"Start crawl search page - url: {url}")
             results = asyncio.run(self.crawl(url=url))
@@ -79,20 +79,16 @@ class WebCrawler:
                 break
             else:
                 # save jobAds to list.
-                count +=1
+                count=0
                 for job in unique_jobAds_per_url:
-                    job_id = job.url.split("?")[0].split("/")[-1]
+                    job_id = get_job_id(job=job)
                     if job_id not in seen:
                         seen.add(job_id)
-                        dict = {
-                            "jobId": job_id,
-                            "url": job.url,
-                            "markdown": job.markdown
-                        }
-                        unique_jobAds.append(dict)
-                        self.logger.info("jobAd: \n%s", pformat(dict))
+                        unique_jobAds.append(job)
+                        count+=1
+                self.logger.info(f"{count} unique job ads crawled under url - {url}.")
         
-        self.logger.info(f"Total no. of unique jobAds crawled from {count} search urls: {len(unique_jobAds)}.")
+        self.logger.info(f"Total no. of unique jobAds crawled: {len(unique_jobAds)}.")
         
         return unique_jobAds[1:] # for remove the first search page.   
         

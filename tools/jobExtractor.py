@@ -37,8 +37,9 @@ class jobExtractor:
 
         Return ONLY valid JSON. No explanation.
         """
-
+       
         response = self.llm.invoke(extraction_prompt)
+        
         self.logger.info(f"Extracted Job Info - Data type: {type(response)}:")
         self.logger.info(f"Data: \n%s", pformat(response))
         self.logger.info("-"*100)

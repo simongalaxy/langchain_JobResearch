@@ -21,4 +21,5 @@ def get_unique_jobAds_by_id(jobAds):
     
     return unique_jobAds
 
-
+def get_job_id(job) -> str:
+    return job.url.split("?")[0].split("/")[-1]

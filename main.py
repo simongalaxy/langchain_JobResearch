@@ -5,8 +5,8 @@ load_dotenv()
 
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
-from tools.jobExtractor import jobExtractor
 from tools.DataProcesser import get_unique_jobAds_by_id
+from tools.JobSummarizer import JobSummarizer
 
 from pprint import pformat
 
@@ -16,10 +16,8 @@ def main():
     # initiate classes: logger, webcrawler, jobExtractor.
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
-    extractor = jobExtractor(logger=logger)
-    
-    
-    
+    summarizer = JobSummarizer(logger=logger)
+
     # chat loop.
     while True:
         keyword = input("Enter your keyword to search jobs (or type 'q' for quit): ")
@@ -36,10 +34,8 @@ def main():
         unique_jobAds = crawler.get_unique_jobAds(urls=urls)
         
         # extract information from jobad and then chunk and embed to chromaDB.
-        for i, job in enumerate(unique_jobAds):
-            logger.info(f"{i}:")
-            extracted_json = extractor.extract_info_from_jobAd(job_content=job["markdown"])
-
+        for job in unique_jobAds:
+            job_summary = summarizer.summarize_info(job_content=job.markdown)
             
     return
 
