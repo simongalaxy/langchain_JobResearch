@@ -12,25 +12,28 @@ load_dotenv()
 
 from tools.JobPosting import JobPosting
 from tools.DataProcesser import get_unique_jobAds_by_id, get_job_id
+from tools.JobSummarizer import JobSummarizer
 
 class WebCrawler:
     def __init__(self, logger):
         self.logger = logger
+        self.summarizer = JobSummarizer(logger=logger)
         self.url_filter = URLPatternFilter(patterns=[r"type=standard$"])
         self.filter_chain = FilterChain(filters=[self.url_filter])
         # self.llm_config = LLMConfig(
-        #     provider="ollama/qwen2.5:3b"
+        #     provider="ollama/mistral:latest"
         # )
         self.browser_config = BrowserConfig(
             headless=True,
             text_mode=True
         )
+        # self.chunker = NlpSentenceChunking()
         # self.llm_strategy = LLMExtractionStrategy(
         #     llm_config=self.llm_config,
         #     schema=JobPosting.model_json_schema(), # for jobsdb.
         #     extraction_type="schema",
         #     instruction="Extract job title, company, responsibilities, requirements, salary, working location and experiences from the content. Use empty strings or empty list if information is missing.", # for jobsdb.
-        #     chunking_strategy=None,
+        #     chunking_strategy=self.chunker,
         #     verbose=True,
         #     extra_args={"temperature": 0, "max_tokens": 800},
         #     input_format="markdown"
@@ -55,15 +58,15 @@ class WebCrawler:
 
     async def crawl(self, url: str):
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
-            result = await crawler.arun(
+            results = await crawler.arun(
                 url=url, 
                 config=self.crawl_config
             )
                 
-        return result 
+        return results
     
 
-    def get_unique_jobAds(self, urls: list[str]):
+    def get_unique_jobAds(self, urls: list[str], keyword: str) -> List[dict]:
         # crawl all jobAds from urls.
         unique_jobAds = []
         seen = set()
@@ -82,14 +85,18 @@ class WebCrawler:
                 count=0
                 for job in unique_jobAds_per_url:
                     job_id = get_job_id(job=job)
-                    if job_id not in seen:
+                    if job_id not in seen and f"{keyword}-jobs" not in job.url: # filter out the non-related job ads and duplicate job ads.
                         seen.add(job_id)
-                        unique_jobAds.append(job)
+                        dict = self.summarizer.summarize_info(job_content=job.markdown)
+                        dict["job_id"] = job_id
+                        dict["source_url"] = job.url
+                        unique_jobAds.append(dict) # save the dict to DuckDB.
                         count+=1
+                        self.logger.info(f"Job Ad dict:\n{pformat(dict)}")
                 self.logger.info(f"{count} unique job ads crawled under url - {url}.")
         
         self.logger.info(f"Total no. of unique jobAds crawled: {len(unique_jobAds)}.")
         
-        return unique_jobAds[1:] # for remove the first search page.   
+        return unique_jobAds 
         
         

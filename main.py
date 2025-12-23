@@ -16,7 +16,7 @@ def main():
     # initiate classes: logger, webcrawler, jobExtractor.
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
-    summarizer = JobSummarizer(logger=logger)
+    # summarizer = JobSummarizer(logger=logger)
 
     # chat loop.
     while True:
@@ -28,14 +28,21 @@ def main():
         logger.info(f"keyword input: {keyword}")
         
         # generate the search page urls for specific keyword.
-        total_page=2
+        total_page=int(os.getenv("MAX_SEARCH_PAGES"))
         urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
         logger.info(f"total {len(urls)} urls: {urls}")
-        unique_jobAds = crawler.get_unique_jobAds(urls=urls)
         
-        # extract information from jobad and then chunk and embed to chromaDB.
+        
+        # crawl job ads from the search page urls and then extract information from job ads.
+        unique_jobAds = crawler.get_unique_jobAds(urls=urls, keyword=keyword)
+        
         for job in unique_jobAds:
-            job_summary = summarizer.summarize_info(job_content=job.markdown)
+            logger.info(f"Job Ad Extracted:\n{pformat(job)}")
+        # extract information from jobad and then chunk and embed to chromaDB.
+        
+        
+            
+      
             
     return
 
