@@ -24,7 +24,7 @@ class JobSummarizer:
 
 
     # Extract structured job data from unstructured job description using LLM/    
-    def summarize_info(self, job_content: str):
+    def summarize_job_info(self, job_content: str):
         
         self.logger.info(f"Original job content:\n {job_content}")
         self.logger.info("--------start LLM extraction-----------")

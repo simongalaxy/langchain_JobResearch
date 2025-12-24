@@ -8,7 +8,7 @@ wheels/
 logs/
 reports/
 .vscode/
-
+database/
 
 # Virtual environments
 .venv

@@ -13,6 +13,7 @@ load_dotenv()
 from tools.JobPosting import JobPosting
 from tools.DataProcesser import get_unique_jobAds_by_id, get_job_id
 from tools.JobSummarizer import JobSummarizer
+from tools.DuchDBHandler import DuchDBHandler
 
 class WebCrawler:
     def __init__(self, logger):
@@ -56,7 +57,7 @@ class WebCrawler:
         self.logger.info("Webcrawler has been initiated.")
 
 
-    async def crawl(self, url: str):
+    async def crawl_page(self, url: str):
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
             results = await crawler.arun(
                 url=url, 
@@ -66,14 +67,14 @@ class WebCrawler:
         return results
     
 
-    def get_unique_jobAds(self, urls: list[str], keyword: str) -> List[dict]:
+    def get_unique_jobAds(self, urls: list[str], keyword: str, DBhandler: DuchDBHandler) -> None:
         # crawl all jobAds from urls.
         unique_jobAds = []
         seen = set()
        
         for url in urls:
             self.logger.info(f"Start crawl search page - url: {url}")
-            results = asyncio.run(self.crawl(url=url))
+            results = asyncio.run(self.crawl_page(url=url))
             
             unique_jobAds_per_url = get_unique_jobAds_by_id(jobAds=results)
             total_unique_jobAds_per_url = len(unique_jobAds_per_url)
@@ -87,16 +88,20 @@ class WebCrawler:
                     job_id = get_job_id(job=job)
                     if job_id not in seen and f"{keyword}-jobs" not in job.url: # filter out the non-related job ads and duplicate job ads.
                         seen.add(job_id)
-                        dict = self.summarizer.summarize_info(job_content=job.markdown)
+                        dict = self.summarizer.summarize_job_info(job_content=job.markdown)
                         dict["job_id"] = job_id
                         dict["source_url"] = job.url
+                        dict["keyword"] = keyword
+                        
+                        DBhandler.insert_jobAd(job=dict) # save the dict to DuckDB.
                         unique_jobAds.append(dict) # save the dict to DuckDB.
                         count+=1
-                        self.logger.info(f"Job Ad dict:\n{pformat(dict)}")
-                self.logger.info(f"{count} unique job ads crawled under url - {url}.")
+                        self.logger.info(f"Job Ad dict:\n {pformat(dict)}")
+                        self.logger.info("-"*100)    
+                    self.logger.info(f"{count} unique job ads crawled under url - {url}.")
         
-        self.logger.info(f"Total no. of unique jobAds crawled: {len(unique_jobAds)}.")
+        self.logger.info(f"Total unique job ads crawled so far: {len(unique_jobAds)}.") 
         
-        return unique_jobAds 
+        return
         
         
