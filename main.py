@@ -18,7 +18,7 @@ def main():
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
     DBhandler = DuchDBHandler(logger=logger)
-    Generator = JobResearchReportGenerator(logger=logger)
+    Generator = JobResearchReportGenerator(logger=logger, DBHandler=DBhandler)
     
     # chat loop.
     while True:
@@ -38,7 +38,7 @@ def main():
         crawler.get_unique_jobAds(urls=urls, keyword=keyword, DBhandler=DBhandler)
         
         # generate report.
-        report = Generator.generate_report()
+        report = Generator.generate_report(keyword=keyword)
         logger.info(f"Generated Report:\n{report}")
         
        
