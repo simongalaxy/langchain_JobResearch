@@ -5,7 +5,7 @@ load_dotenv()
 
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
-from tools.DataProcesser import get_unique_jobAds_by_id
+from tools.JobSummarizer import JobSummarizer
 from tools.DuchDBHandler import DuchDBHandler
 from tools.ReportGenerator import JobResearchReportGenerator
 
@@ -17,8 +17,8 @@ def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
-    DBhandler = DuchDBHandler(logger=logger)
-    Generator = JobResearchReportGenerator(logger=logger, DBHandler=DBhandler)
+    summarizer = JobSummarizer(logger=logger)
+    DBHandler = DuchDBHandler(logger=logger)
     
     # chat loop.
     while True:
@@ -34,12 +34,20 @@ def main():
         urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
         logger.info(f"total {len(urls)} urls: {urls}")
         
-        # crawl job ads from the search page urls, extract information from job ads and then save data to duckDB.
-        crawler.get_unique_jobAds(urls=urls, keyword=keyword, DBhandler=DBhandler)
+        results = asyncio.run(crawler.crawl_multiple_pages(urls=urls, keyword=keyword))
+        unique_jobAds = crawler.get_unique_jobAds(results=results, keyword=keyword)
         
-        # generate report.
-        report = Generator.generate_report(keyword=keyword)
-        logger.info(f"Generated Report:\n{report}")
+        # summarize the job ads.
+        summaries = asyncio.run(summarizer.summarize_all_jobs(jobs=unique_jobAds, keyword=keyword))
+        
+        # save data to database.
+        logger.info("Start insert all the summaries to DuckDB.")
+        for i, summary in enumerate(summaries):
+            DBHandler.insert_jobAd(job=summary)
+            
+        # # generate report.
+        # report = Generator.generate_report(keyword=keyword)
+        # logger.info(f"Generated Report:\n{report}")
         
        
     return

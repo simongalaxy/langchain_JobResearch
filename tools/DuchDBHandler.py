@@ -22,7 +22,7 @@ class DuchDBHandler:
                 company VARCHAR,
                 responsibilities VARCHAR[],
                 qualifications VARCHAR[],
-                experiences VARCHAR,
+                experiences VARCHAR[],
                 skills VARCHAR[],
                 salary VARCHAR,
                 working_location VARCHAR,
@@ -45,6 +45,7 @@ class DuchDBHandler:
             return result.to_string(index=False) or "No results."
         except Exception as e:
             return f"Query error: {str(e)}"
+
 
     def gather_insights(self, keyword: str) -> str:
         """Run a set of targeted SQL queries to extract all needed data for the report."""

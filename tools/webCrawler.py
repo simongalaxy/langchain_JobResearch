@@ -10,35 +10,16 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from tools.JobPosting import JobPosting
-from tools.DataProcesser import get_unique_jobAds_by_id, get_job_id
-from tools.JobSummarizer import JobSummarizer
-from tools.DuchDBHandler import DuchDBHandler
 
 class WebCrawler:
     def __init__(self, logger):
         self.logger = logger
-        self.summarizer = JobSummarizer(logger=logger)
         self.url_filter = URLPatternFilter(patterns=[r"type=standard$"])
         self.filter_chain = FilterChain(filters=[self.url_filter])
-        # self.llm_config = LLMConfig(
-        #     provider="ollama/mistral:latest"
-        # )
         self.browser_config = BrowserConfig(
             headless=True,
             text_mode=True
         )
-        # self.chunker = NlpSentenceChunking()
-        # self.llm_strategy = LLMExtractionStrategy(
-        #     llm_config=self.llm_config,
-        #     schema=JobPosting.model_json_schema(), # for jobsdb.
-        #     extraction_type="schema",
-        #     instruction="Extract job title, company, responsibilities, requirements, salary, working location and experiences from the content. Use empty strings or empty list if information is missing.", # for jobsdb.
-        #     chunking_strategy=self.chunker,
-        #     verbose=True,
-        #     extra_args={"temperature": 0, "max_tokens": 800},
-        #     input_format="markdown"
-        # )
         self.crawl_config = CrawlerRunConfig(
             deep_crawl_strategy=BFSDeepCrawlStrategy(
                 max_depth=1,  # Reduced depth for faster crawling
@@ -52,9 +33,37 @@ class WebCrawler:
             # Use valid CSS attribute selectors for better compatibility
             target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'], # for jobsdb
             cache_mode=CacheMode.BYPASS,
-            # extraction_strategy=self.llm_strategy
         )
         self.logger.info("Webcrawler has been initiated.")
+
+    
+    def get_job_id(self, result) -> str:
+        return result.url.split("?")[0].split("/")[-1]
+    
+    
+    def get_unique_jobAds(self, results, keyword):
+        seen = set()
+        unique_jobAds = []
+        
+        self.logger.info(f"Start getting unique jobAds....")
+        for result in results:
+            self.logger.info(f"result url: {result.url}")
+            job_id = self.get_job_id(result=result)
+            self.logger.info(f"job_id: {job_id}")
+            
+            if job_id not in seen and f"{keyword}-jobs" not in job_id:
+                seen.add(job_id)
+                unique_jobAds.append(result)
+        
+        self.logger.info(f"Total {len(unique_jobAds)} unique jobAds get.")
+        
+        # log all the unique jobAds.
+        # for i, job in enumerate(unique_jobAds, start=1):
+        #     self.logger.info(f"{i} out of {len(unique_jobAds)}:")
+        #     self.logger.info(f"job url: {job.url}")
+        #     self.logger.info("job markdown: \n%s", job.markdown)
+        
+        return unique_jobAds
 
 
     async def crawl_page(self, url: str):
@@ -66,42 +75,28 @@ class WebCrawler:
                 
         return results
     
-
-    def get_unique_jobAds(self, urls: list[str], keyword: str, DBhandler: DuchDBHandler) -> None:
-        # crawl all jobAds from urls.
-        unique_jobAds = []
-        seen = set()
-       
-        for url in urls:
-            self.logger.info(f"Start crawl search page - url: {url}")
-            results = asyncio.run(self.crawl_page(url=url))
-            
-            unique_jobAds_per_url = get_unique_jobAds_by_id(jobAds=results)
-            total_unique_jobAds_per_url = len(unique_jobAds_per_url)
-            
-            if total_unique_jobAds_per_url == 1: # break the loop when no search results.
-                break
-            else:
-                # save jobAds to list.
-                count=0
-                for job in unique_jobAds_per_url:
-                    job_id = get_job_id(job=job)
-                    if job_id not in seen and f"{keyword}-jobs" not in job.url: # filter out the non-related job ads and duplicate job ads.
-                        seen.add(job_id)
-                        dict = self.summarizer.summarize_job_info(job_content=job.markdown)
-                        dict["job_id"] = job_id
-                        dict["source_url"] = job.url
-                        dict["keyword"] = keyword
-                        
-                        DBhandler.insert_jobAd(job=dict) # save the dict to DuckDB.
-                        unique_jobAds.append(dict) # save the dict to DuckDB.
-                        count+=1
-                        self.logger.info(f"Job Ad dict:\n {pformat(dict)}")
-                        self.logger.info("-"*100)    
-                    self.logger.info(f"{count} unique job ads crawled under url - {url}.")
+    
+    async def crawl_multiple_pages(self, urls: list[str], keyword):
+        tasks = [self.crawl_page(url=url) for url in urls]
+        results = await asyncio.gather(*tasks)
         
-        self.logger.info(f"Total unique job ads crawled so far: {len(unique_jobAds)}.") 
+        # consolidate a list of jobAd from results.
+        jobAds = []
+        for result in results:
+            for item in result:
+                jobAds.append(item)
+            
+        self.logger.info(f"Total Pages crawled:        {len(jobAds)}")
+        self.logger.info(f"Total search Pages crawled: {len(urls)}")
         
-        return
+        # return unique_jobAds.
+        self.logger.info("Start to get unique jobAds.")
+        unique_jobAds = self.get_unique_jobAds(results=jobAds, keyword=keyword)
+        
+        return unique_jobAds 
+    
+    
+    
+    
         
         

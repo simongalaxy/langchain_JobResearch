@@ -7,8 +7,11 @@ class JobPosting(BaseModel):
     company: Optional[str] = Field(description="company of this job")
     responsibilities: List[str] = Field(description="all the task responsibilities of the job")
     qualifications: List[str] = Field(description="all the job qualifications required")
-    experiences: Optional[str] = Field(description="working expereiences required for this job")
+    experiences: List[str] = Field(description="all the working expereiences required")
     skills: List[str] = Field(description="all the technical and soft skills required for this job")
-    salary: Optional[str]
+    salary: Optional[str] 
     working_location: Optional[str]
+    job_id: Optional[str] = None
+    source_url: Optional[str] = None
+    keyword: Optional[str] = None
     
