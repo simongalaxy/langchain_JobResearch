@@ -8,17 +8,24 @@ from tools.webCrawler import WebCrawler
 from tools.JobSummarizer import JobSummarizer
 from tools.DuchDBHandler import DuchDBHandler
 from tools.ReportGenerator import JobResearchReportGenerator
+from tools.writeReport import write_report
 
 from pprint import pformat
 
+def generate_urls(keyword: str) -> list[str]:
+    total_page=int(os.getenv("MAX_SEARCH_PAGES"))
+    urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
+    
+    return urls
 
 # main program.
 def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
-    crawler = WebCrawler(logger=logger)
-    summarizer = JobSummarizer(logger=logger)
+    Crawler = WebCrawler(logger=logger)
+    Summarizer = JobSummarizer(logger=logger)
     DBHandler = DuchDBHandler(logger=logger)
+    Generator = JobResearchReportGenerator(logger=logger, DBHandler=DBHandler)
     
     # chat loop.
     while True:
@@ -30,25 +37,28 @@ def main():
         logger.info(f"keyword input: {keyword}")
         
         # generate the search page urls for specific keyword.
-        total_page=int(os.getenv("MAX_SEARCH_PAGES"))
-        urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
-        logger.info(f"total {len(urls)} urls: {urls}")
+        urls = generate_urls(keyword=keyword)
+        logger.info(f"Total {len(urls)} generated: {urls}")
         
-        results = asyncio.run(crawler.crawl_multiple_pages(urls=urls, keyword=keyword))
-        unique_jobAds = crawler.get_unique_jobAds(results=results, keyword=keyword)
+        unique_jobAds  = asyncio.run(Crawler.crawl_multiple_pages(urls=urls, keyword=keyword))
         
         # summarize the job ads.
-        summaries = asyncio.run(summarizer.summarize_all_jobs(jobs=unique_jobAds, keyword=keyword))
+        summaries = asyncio.run(Summarizer.summarize_all_jobs(jobs=unique_jobAds, keyword=keyword))
         
         # save data to database.
         logger.info("Start insert all the summaries to DuckDB.")
         for i, summary in enumerate(summaries):
             DBHandler.insert_jobAd(job=summary)
             
-        # # generate report.
-        # report = Generator.generate_report(keyword=keyword)
-        # logger.info(f"Generated Report:\n{report}")
+        # generate report.
+        report = Generator.generate_report(keyword=keyword)
+        logger.info(f"Generated Report:\n{report}")
         
+        # save the report in text file.
+        write_report(
+            keyword=keyword,
+            markdown=report
+        )
        
     return
 

@@ -47,21 +47,12 @@ class WebCrawler:
         
         self.logger.info(f"Start getting unique jobAds....")
         for result in results:
-            self.logger.info(f"result url: {result.url}")
             job_id = self.get_job_id(result=result)
-            self.logger.info(f"job_id: {job_id}")
-            
             if job_id not in seen and f"{keyword}-jobs" not in job_id:
                 seen.add(job_id)
                 unique_jobAds.append(result)
         
         self.logger.info(f"Total {len(unique_jobAds)} unique jobAds get.")
-        
-        # log all the unique jobAds.
-        # for i, job in enumerate(unique_jobAds, start=1):
-        #     self.logger.info(f"{i} out of {len(unique_jobAds)}:")
-        #     self.logger.info(f"job url: {job.url}")
-        #     self.logger.info("job markdown: \n%s", job.markdown)
         
         return unique_jobAds
 
@@ -90,7 +81,6 @@ class WebCrawler:
         self.logger.info(f"Total search Pages crawled: {len(urls)}")
         
         # return unique_jobAds.
-        self.logger.info("Start to get unique jobAds.")
         unique_jobAds = self.get_unique_jobAds(results=jobAds, keyword=keyword)
         
         return unique_jobAds 
