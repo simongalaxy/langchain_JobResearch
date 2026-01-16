@@ -10,7 +10,7 @@ def write_report(keyword: str, markdown: str) -> str:
     filepath = "./reports/"
     
     # define the desired page width.
-    width_limit = 70
+    width_limit = 80
     formatted_text = textwrap.fill(textwrap.dedent(markdown).strip(), width=width_limit)
     
 

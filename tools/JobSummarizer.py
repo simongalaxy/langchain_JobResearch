@@ -41,7 +41,7 @@ class JobSummarizer:
         summary.source_url = job.url
         summary.keyword = keyword
         
-        summary_dict = summary.model_dump(mode="json")
+        summary_dict = summary.model_dump_json()
         
         self.logger.info(f"Extracted Job Info - Data type: {type(summary_dict)}:")
         self.logger.info(f"Data: \n%s", pformat(summary_dict, indent=2))
