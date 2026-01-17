@@ -1,4 +1,4 @@
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LLMConfig, LLMExtractionStrategy, CacheMode, BrowserConfig
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LLMConfig, LLMExtractionStrategy, CacheMode, BrowserConfig, MemoryAdaptiveDispatcher
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
 from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
 from crawl4ai.deep_crawling.filters import URLPatternFilter, FilterChain
@@ -34,7 +34,10 @@ class WebCrawler:
             target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'], # for jobsdb
             cache_mode=CacheMode.BYPASS,
         )
-
+        self.dispatcher = MemoryAdaptiveDispatcher(
+            memory_threshold_percent=70.0,
+            check_interval=1
+        )
         self.logger.info("Webcrawler has been initiated.")
 
 
@@ -42,7 +45,8 @@ class WebCrawler:
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
             results = await crawler.arun(
                 url=url, 
-                config=self.crawl_config
+                config=self.crawl_config,
+                dispatcher=self.dispatcher
             )
         self.logger.info(f"Total {len(results)} job ad crawled from url - {url}")
          
