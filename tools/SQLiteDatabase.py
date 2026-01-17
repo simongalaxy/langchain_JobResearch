@@ -9,7 +9,7 @@ load_dotenv()
 class JobAd(SQLModel):
     id: str = Field(primary_key=True, unique=True) # 👈 Enforce uniqueness
     url: str
-    ad_content: str
+    content: str
     keyword: str
 
 
@@ -77,10 +77,6 @@ class sqliteHandler:
                 session.commit()
                 return True
             return False
-
-    # def list_all_JobAds(self, keyword: str):
-    #     with Session(self.engine) as session:
-    #         return session.exec(select(JobAd)).all()
 
     def list_all_JobAds_id(self):
         with Session(self.engine) as session:

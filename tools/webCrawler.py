@@ -14,7 +14,7 @@ load_dotenv()
 class WebCrawler:
     def __init__(self, logger):
         self.logger = logger
-        self.url_filter = URLPatternFilter(patterns=[r"type=standard$"])
+        self.url_filter = URLPatternFilter(patterns=[r"\d+\?type=standard"])
         self.filter_chain = FilterChain(filters=[self.url_filter])
         self.browser_config = BrowserConfig(
             headless=True,
@@ -34,41 +34,23 @@ class WebCrawler:
             target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'], # for jobsdb
             cache_mode=CacheMode.BYPASS,
         )
+
         self.logger.info("Webcrawler has been initiated.")
 
-    
-    def get_job_id(self, result) -> str:
-        return result.url.split("?")[0].split("/")[-1]
-    
-    
-    def get_unique_jobAds(self, results, keyword):
-        seen = set()
-        unique_jobAds = []
-        
-        self.logger.info(f"Start getting unique jobAds....")
-        for result in results:
-            job_id = self.get_job_id(result=result)
-            if job_id not in seen and f"{keyword}-jobs" not in job_id:
-                seen.add(job_id)
-                unique_jobAds.append(result)
-        
-        self.logger.info(f"Total {len(unique_jobAds)} unique jobAds get.")
-        
-        return unique_jobAds
 
-
-    async def crawl_page(self, url: str):
+    async def crawl_single_page(self, url: str):
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
             results = await crawler.arun(
                 url=url, 
                 config=self.crawl_config
             )
-                
+        self.logger.info(f"Total {len(results)} job ad crawled from url - {url}")
+         
         return results
     
     
-    async def crawl_multiple_pages(self, urls: list[str], keyword):
-        tasks = [self.crawl_page(url=url) for url in urls]
+    async def crawl_multiple_pages(self, urls: list[str]):
+        tasks = [self.crawl_single_page(url=url) for url in urls]
         results = await asyncio.gather(*tasks)
         
         # consolidate a list of jobAd from results.
@@ -80,10 +62,8 @@ class WebCrawler:
         self.logger.info(f"Total Pages crawled:        {len(jobAds)}")
         self.logger.info(f"Total search Pages crawled: {len(urls)}")
         
-        # return unique_jobAds.
-        unique_jobAds = self.get_unique_jobAds(results=jobAds, keyword=keyword)
-        
-        return unique_jobAds 
+        return jobAds 
+    
     
     
     

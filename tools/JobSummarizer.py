@@ -50,10 +50,7 @@ class JobSummarizer:
     
     async def summarize_all_jobs(self, jobs, keyword):
         self.logger.info("Job Summarization starts.")
-        tasks = [
-            asyncio.create_task(self.summarize_job_info(job=job, keyword=keyword)) 
-            for job in jobs
-            ]
+        tasks = [self.summarize_job_info(job=job, keyword=keyword) for job in jobs]
         summaries = await asyncio.gather(*tasks)
         self.logger.info("Job summarization completed.")
         
