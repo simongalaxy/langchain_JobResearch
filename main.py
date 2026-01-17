@@ -47,23 +47,24 @@ def main():
         urls = generate_urls(keyword=keyword)
         logger.info(f"Total {len(urls)} generated: {urls}")
         
-        jobAds = asyncio.run(Crawler.crawl_multiple_pages(urls=urls))
+        # jobAds = asyncio.run(Crawler.crawl_multiple_pages(urls=urls, keyword=keyword))
+        jobAds = asyncio.run(Crawler.crawl_multiple_pages(urls=urls, keyword=keyword))
         
         # save all crawled data:
-        logger.info("Save crawled data into sqlite3 DB.")
-        for job in jobAds:
-            job_item = JobAd(
-                id=job.url.split("?")[0].split("/")[-1],
-                url=job.url,
-                ad_content=job.markdown,
-                keyword=keyword
-            )
-            logger.info(f"job_item: \n%s", pformat(job_item.model_dump(), indent=2))
-            sqlHandler.create_JobAd(job_item=job_item)
+        # logger.info("Save crawled data into sqlite3 DB.")
+        # for job in jobAds:
+        #     job_item = JobAd(
+        #         id=job.url.split("?")[0].split("/")[-1],
+        #         url=job.url,
+        #         content=job.markdown,
+        #         keyword=keyword
+        #     )
+        #     logger.info(f"job_item: \n%s", pformat(job_item.model_dump(), indent=2))
+        #     sqlHandler.create_JobAd(job_item=job_item)
         
 
-        jobs = sqlHandler.fetch_all_JobAds_by_keyword(keyword=keyword)
-        logger.info(f"total No. of JobAds fetched from sqlite3 DB: {len(jobs)}")
+        # jobs = sqlHandler.fetch_all_JobAds_by_keyword(keyword=keyword)
+        # logger.info(f"total No. of JobAds fetched from sqlite3 DB: {len(jobs)}")
         # summarize the job ads.
         # summaries = asyncio.run(Summarizer.summarize_all_jobs(jobs=jobAds, keyword=keyword))
         
