@@ -1,31 +1,19 @@
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LLMConfig, LLMExtractionStrategy, CacheMode, BrowserConfig
-from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode, BrowserConfig, MemoryAdaptiveDispatcher
 from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
-from crawl4ai.deep_crawling.filters import URLPatternFilter, FilterChain
 
 import asyncio
-from pprint import pformat
-from typing import List
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from pprint import pprint
+import re
 
 
 class WebCrawler:
     def __init__(self, logger):
         self.logger = logger
-        self.url_filter = URLPatternFilter(patterns=[r"\d+\?type=standard"])
-        self.filter_chain = FilterChain(filters=[self.url_filter])
         self.browser_config = BrowserConfig(
             headless=True,
             text_mode=True
         )
-        self.crawl_config = CrawlerRunConfig(
-            deep_crawl_strategy=BFSDeepCrawlStrategy(
-                max_depth=1,  # Reduced depth for faster crawling
-                include_external=False,
-                filter_chain=self.filter_chain
-                ),
+        self.crawl_config_job = CrawlerRunConfig(
             scraping_strategy=LXMLWebScrapingStrategy(),
             exclude_all_images=True,
             exclude_social_media_domains=True,
@@ -34,38 +22,76 @@ class WebCrawler:
             target_elements=['h1[data-automation="job-detail-title"]', 'div[data-automation="jobAdDetails"]'], # for jobsdb
             cache_mode=CacheMode.BYPASS,
         )
-        self.logger.info("Webcrawler has been initiated.")
+        self.crawl_config_search = CrawlerRunConfig(
+            scraping_strategy=LXMLWebScrapingStrategy(),
+            exclude_all_images=True,
+            exclude_social_media_domains=True,
+            exclude_external_links=True,
+            cache_mode=CacheMode.BYPASS,
+        )
+        self.dispatcher = MemoryAdaptiveDispatcher(
+            memory_threshold_percent=70,
+            check_interval=1,
+            max_session_permit=3
+        )
+        
+        self.logger.info(f"{WebCrawler.__name__} initiated.")
 
 
-    async def crawl_single_page(self, url: str):
+    async def crawl_job_pages(self, urls: list[str]):
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
-            results = await crawler.arun(
-                url=url, 
-                config=self.crawl_config,
+            job_results = await crawler.arun_many(
+                urls=urls, 
+                config=self.crawl_config_job,
+                dispatcher=self.dispatcher
             )
-        self.logger.info(f"Total {len(results)} job ad crawled from url - {url}")
+        self.logger.info(f"Total {len(job_results)} job pages crawled.")
+                
+        return job_results
+    
+    
+    async def crawl_search_pages(self, urls: list[str]):
+        async with AsyncWebCrawler(config=self.browser_config) as crawler:
+            results = await crawler.arun_many(
+                urls=urls, 
+                config=self.crawl_config_search,
+                dispatcher=self.dispatcher
+            )
+        
+        # extract the job page links.
+        job_links = []
+        for i, result in enumerate(results):
+            links = result.links.get("internal", [])
+            for link in links:
+                if re.search(pattern=r"\d+\?type=standard", string=link["href"]):
+                    job_links.append(link["href"])
+            
+        self.logger.info(f"Total {len(job_links)} job page links crawled from {len(urls)} search pages.")    
          
-        return results
+        return job_links
+
     
-    
-    async def crawl_multiple_pages(self, urls: list[str], keyword: str):
-        tasks = [self.crawl_single_page(url=url) for url in urls]
-        results = await asyncio.gather(*tasks)
+    def generate_urls(self, keyword: str, total_page: int) -> list[str]:
+        urls = [f"https://hk.jobsdb.com/{keyword}-jobs?page={page}" for page in range(1, total_page)]
+        self.logger.info(f"Generated total {len(urls)} search pages - urls: {urls}")
         
-        # consolidate a list of jobAd from results.
-        jobAds = []
+        return urls
+
+
+    def crawl_all_job_pages(self, keyword: str, total_pages: int): 
+        # Generate search pages.
+        urls = self.generate_urls(
+            keyword=keyword, 
+            total_page=total_pages)
+        for i, url in enumerate(urls):
+            print(f"{i}: {url}")
+
+        # crawl all links for job pages from search pages.
+        job_links = asyncio.run(self.crawl_search_pages(urls=urls))
         
-        for result in results:
-            for item in result:
-                if "jobs?page=" not in item.url:
-                    jobAds.append(item)
-                    
-        self.logger.info(f"Total Pages crawled:        {len(jobAds)}")
-        self.logger.info(f"Total search Pages crawled: {len(urls)}")
-        
-        return jobAds 
-    
-    
-    
+        # crawl all contents from each job pages.
+        job_results = asyncio.run(self.crawl_job_pages(urls=job_links))
+
+        return job_results
         
         

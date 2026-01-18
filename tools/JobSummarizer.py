@@ -31,17 +31,17 @@ class JobSummarizer:
         
         # get the job summary.
         summary = await self.structured_llm.ainvoke(
-            self.prompt.format(job_content=job.markdown)
+            self.prompt.format(job_content=job.content)
         )
         # add relevant attribute to summary class.
-        summary.job_id = job.url.split("?")[0].split("/")[-1]
+        summary.job_id = job.id
         summary.source_url = job.url
-        summary.keyword = keyword
+        summary.keyword = job.keyword
         
         # convert pydantic class to dict.
         summary_dict = summary.model_dump()
         
-        self.logger.info(f"Original job content:\n {job.markdown}")
+        self.logger.info(f"Original job content:\n {job.content}")
         self.logger.info(f"Extracted job info (data type: {type(summary_dict)}): \n%s", pformat(summary_dict, indent=2))
         self.logger.info("-"*100)
           
