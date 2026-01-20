@@ -19,7 +19,7 @@ class Post(BaseModel):
     qualifications: List[str] = Field(description="all the job qualifications")
     experiences: List[str] = Field(description="years of working expereiences")
     skills: List[str] = Field(description="all the technical and soft skills")
-    salary: Optional[str] = Field(default=None, description="amount of salary")
+    salary: Optional[str] = Field(default=None, description="salary")
     working_location: Optional[str] = Field(default=None, description="working location")
 
 
