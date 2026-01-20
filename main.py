@@ -1,8 +1,7 @@
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
 from tools.JobSummarizer import JobSummarizer
-from tools.SQLiteDatabase import sqliteHandler
-from tools.DuchDBHandler import DuchDBHandler
+from tools.PostgresDatabase import PostgresDBHandler
 # from tools.ReportGenerator import JobResearchReportGenerator
 # from tools.writeReport import write_report
 
@@ -19,9 +18,8 @@ def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
     Crawler = WebCrawler(logger=logger)
-    sqlHandler = sqliteHandler(logger=logger)
-    sqlHandler.check_and_create_table()
-    DBHandler = DuchDBHandler(logger=logger)
+    PsqlHandler = PostgresDBHandler(logger=logger)
+    PsqlHandler.check_and_create_table()
     Summarizer = JobSummarizer(logger=logger)
     # Generator = JobResearchReportGenerator(logger=logger, DBHandler=DBHandler)
     
@@ -34,28 +32,28 @@ def main():
             break
         logger.info(f"keyword input: {keyword}")
         
-        # job_results = Crawler.crawl_all_job_pages(
-        #     keyword=keyword, 
-        #     total_pages=20
-        # )
+        job_results = Crawler.crawl_all_job_pages(
+            keyword=keyword, 
+            total_pages=15
+        )
         
-        # # # save all crawled data:
-        # sqlHandler.save_jobAd_to_db(
-        #     job_results=job_results, 
-        #     keyword=keyword
-        # )
+        # # save all crawled data:
+        PsqlHandler.save_jobAd_to_db(
+            job_results=job_results, 
+            keyword=keyword
+        )
 
         # load data from sqlite3DB for generating summaries.
-        jobs = sqlHandler.fetch_all_JobAds_by_keyword(keyword=keyword)
+        jobs = PsqlHandler.fetch_all_JobAds_by_keyword(keyword=keyword)
         logger.info(f"total No. of JobAds fetched from sqlite3 DB: {len(jobs)}")
         
         # summarize the job ads.
-        summaries = asyncio.run(Summarizer.summarize_all_jobs(jobs=jobs, keyword=keyword))
+        summary_dicts = asyncio.run(Summarizer.summarize_all_jobs(jobs=jobs, keyword=keyword))
         
         # save data to database.
         logger.info("Start insert all the summaries to DuckDB.")
-        for i, summary in enumerate(summaries):
-            DBHandler.insert_jobAd(job=summary)
+        for dict in summary_dicts:
+            PsqlHandler.update_JobAd(id=dict["id"], update_data=dict)
             
         # # generate report.
         # report = Generator.generate_report(keyword=keyword)

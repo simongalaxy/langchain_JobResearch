@@ -9,7 +9,19 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from tools.JobPosting import Post
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+class Post(BaseModel):
+    job_title: str = Field(description="job title")
+    company: Optional[str] = Field(default=None, description="company name")
+    responsibilities: List[str] = Field(description="all the task responsibilities of the job")
+    qualifications: List[str] = Field(description="all the job qualifications required")
+    experiences: List[str] = Field(description="working expereiences required")
+    skills: List[str] = Field(description="all the technical and soft skills required for this job")
+    salary: Optional[str] = Field(default=None, description="salary")
+    working_location: Optional[str] = Field(default=None, description="working location")
+
 
 class JobSummarizer:
     def __init__(self, logger):
@@ -33,19 +45,16 @@ class JobSummarizer:
         summary = await self.structured_llm.ainvoke(
             self.prompt.format(job_content=job.content)
         )
-        # add relevant attribute to summary class.
-        summary.job_id = job.id
-        summary.source_url = job.url
-        summary.keyword = job.keyword
         
         # convert pydantic class to dict.
         summary_dict = summary.model_dump()
+        summary_dict["id"] = job.id
         
         self.logger.info(f"Original job content:\n {job.content}")
         self.logger.info(f"Extracted job info (data type: {type(summary_dict)}): \n%s", pformat(summary_dict, indent=2))
         self.logger.info("-"*100)
           
-        return summary
+        return summary_dict
     
     
     async def summarize_all_jobs(self, jobs, keyword):
