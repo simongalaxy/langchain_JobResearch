@@ -1,11 +1,14 @@
-import duckdb
-import os
-from langchain_community.utilities import SQLDatabase
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_community.utilities.sql_database import SQLDatabase
 
+
+from tools.PostgresDatabase import PostgresDBHandler
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class JobResearchReportGenerator:
     """
@@ -22,16 +25,16 @@ class JobResearchReportGenerator:
     If your table/column names differ, update the PROMPT_TEMPLATE accordingly.
     """
     
-    def __init__(self, logger, DBHandler):
+    def __init__(self, logger, Handler: PostgresDBHandler):
         # Connect to DuckDB via LangChain's SQLDatabase (uses SQLAlchemy under the hood)
         self.logger = logger
-        self.DBHandler = DBHandler
-        self.table_name = os.getenv("DB_TABLE")
+        self.PsqlHandler = Handler
+        self.table_name = os.getenv("db_name")
         
         # Ollama LLM (chat model for better structured responses)
         self.llm = ChatOllama(
             model=os.getenv("OLLAMA_LLM_MODEL"),
-            temperature=0.3,  # Low temperature for analytical/factual output
+            temperature=0,  # Low temperature for analytical/factual output
         )
 
         # Comprehensive prompt that guides the LLM to extract all required insights in one go

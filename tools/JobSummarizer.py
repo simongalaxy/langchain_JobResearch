@@ -16,10 +16,10 @@ class Post(BaseModel):
     job_title: str = Field(description="job title")
     company: Optional[str] = Field(default=None, description="company name")
     responsibilities: List[str] = Field(description="all the task responsibilities of the job")
-    qualifications: List[str] = Field(description="all the job qualifications required")
-    experiences: List[str] = Field(description="working expereiences required")
-    skills: List[str] = Field(description="all the technical and soft skills required for this job")
-    salary: Optional[str] = Field(default=None, description="salary")
+    qualifications: List[str] = Field(description="all the job qualifications")
+    experiences: List[str] = Field(description="years of working expereiences")
+    skills: List[str] = Field(description="all the technical and soft skills")
+    salary: Optional[str] = Field(default=None, description="amount of salary")
     working_location: Optional[str] = Field(default=None, description="working location")
 
 

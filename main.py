@@ -34,7 +34,7 @@ def main():
         
         job_results = Crawler.crawl_all_job_pages(
             keyword=keyword, 
-            total_pages=15
+            total_pages=2
         )
         
         # # save all crawled data:
