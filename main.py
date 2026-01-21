@@ -17,10 +17,10 @@ load_dotenv()
 def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
-    Crawler = WebCrawler(logger=logger)
     PsqlHandler = PostgresDBHandler(logger=logger)
     PsqlHandler.check_and_create_table()
-    Summarizer = JobSummarizer(logger=logger)
+    Crawler = WebCrawler(logger=logger)
+    Summarizer = JobSummarizer(logger=logger, PsqlHandler=PsqlHandler)
     # Generator = JobResearchReportGenerator(logger=logger, DBHandler=DBHandler)
     
     # chat loop.
@@ -47,13 +47,13 @@ def main():
         jobs = PsqlHandler.fetch_all_JobAds_by_keyword(keyword=keyword)
         logger.info(f"total No. of JobAds fetched from sqlite3 DB: {len(jobs)}")
         
-        # summarize the job ads.
+        # summarize the job ads and update database record accordingly.
         summary_dicts = asyncio.run(Summarizer.summarize_all_jobs(jobs=jobs, keyword=keyword))
         
-        # save data to database.
-        logger.info("Start insert all the summaries to DuckDB.")
-        for dict in summary_dicts:
-            PsqlHandler.update_JobAd(id=dict["id"], update_data=dict)
+        # # save data to database.
+        # logger.info("Start insert all the summaries to Postgresql database.")
+        # for dict in summary_dicts:
+        #     PsqlHandler.update_JobAd(id=dict["id"], update_data=dict)
             
         # # generate report.
         # report = Generator.generate_report(keyword=keyword)

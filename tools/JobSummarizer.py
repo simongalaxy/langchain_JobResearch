@@ -1,6 +1,7 @@
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
+from tools.PostgresDatabase import PostgresDBHandler
 
 import asyncio
 from pprint import pformat
@@ -24,8 +25,9 @@ class Post(BaseModel):
 
 
 class JobSummarizer:
-    def __init__(self, logger):
+    def __init__(self, logger, PsqlHandler: PostgresDBHandler):
         self.logger = logger
+        self.DBhandler = PsqlHandler
         self.modelName = os.getenv("OLLAMA_SUMMARIZATION_MODEL")
         self.llm = ChatOllama(
             model= self.modelName,
@@ -48,7 +50,9 @@ class JobSummarizer:
         
         # convert pydantic class to dict.
         summary_dict = summary.model_dump()
-        summary_dict["id"] = job.id
+        # summary_dict = job.id
+        # update relevant data in postgresql database.
+        self.DBhandler.update_JobAd(id=job.id, update_data=summary_dict)
         
         self.logger.info(f"Original job content:\n {job.content}")
         self.logger.info(f"Extracted job info (data type: {type(summary_dict)}): \n%s", pformat(summary_dict, indent=2))

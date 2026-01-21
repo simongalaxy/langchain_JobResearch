@@ -32,7 +32,7 @@ class WebCrawler:
         self.dispatcher = MemoryAdaptiveDispatcher(
             memory_threshold_percent=70,
             check_interval=1,
-            max_session_permit=3
+            max_session_permit=4
         )
         
         self.logger.info(f"{WebCrawler.__name__} initiated.")
