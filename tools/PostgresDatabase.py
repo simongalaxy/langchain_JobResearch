@@ -60,7 +60,7 @@ class PostgresDBHandler:
                 session.add(job_item)
                 session.commit()
                 session.refresh(job_item)
-                self.logger.info(f"JobAd - id: {job_item.id}) saved to sqlite3.")
+                self.logger.info(f"JobAd - id: {job_item.id} saved to Postgresql database.")
             else:
                 self.logger.info(f"JobAd - id: {job_item.id} item already existed in database. No saving action taken.")   
         
@@ -106,18 +106,18 @@ class PostgresDBHandler:
             return session.exec(select(JobAd.id)).all()
     
     
-    def save_jobAd_to_db(self, job_results, keyword) -> None:
-        # save all crawled data:
-        self.logger.info("Save crawled data into sqlite3 DB.")
-        for job in job_results:
-            job_item = JobAd(
-                id=job.url.split("?")[0].split("/")[-1],
-                url=job.url,
-                content=job.markdown,
-                keyword=keyword
-            )
-            # self.logger.info(f"job_item: \n%s", pformat(job_item.model_dump(), indent=2))
-            self.create_JobAd(job_item=job_item)
-        self.logger.info(f"Saved total {len(job_results)} jobDBs into Postgresql for keyword - {keyword}.")
-        return None
+    # def save_jobAd_to_db(self, job_results, keyword) -> None:
+    #     # save all crawled data:
+    #     self.logger.info("Save crawled data into sqlite3 DB.")
+    #     for job in job_results:
+    #         job_item = JobAd(
+    #             id=job.url.split("?")[0].split("/")[-1],
+    #             url=job.url,
+    #             content=job.markdown,
+    #             keyword=keyword
+    #         )
+    #         # self.logger.info(f"job_item: \n%s", pformat(job_item.model_dump(), indent=2))
+    #         self.create_JobAd(job_item=job_item)
+    #     self.logger.info(f"Saved total {len(job_results)} jobDBs into Postgresql for keyword - {keyword}.")
+    #     return None
             
