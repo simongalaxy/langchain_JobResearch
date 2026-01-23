@@ -12,7 +12,7 @@ class WebCrawler:
         self.browser_config = BrowserConfig(
             headless=True,
             text_mode=True,
-	    light_mode=True
+	        light_mode=True
         )
         self.crawl_config_job = CrawlerRunConfig(
             scraping_strategy=LXMLWebScrapingStrategy(),

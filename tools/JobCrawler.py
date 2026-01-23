@@ -48,12 +48,12 @@ class JobCrawler:
             llm_config=self.llm_config,
             schema=Post.model_json_schema(),
             extraction_type="schema",
-            instruction="Summarize the item from the content. Do not add any additional information not present in the content.",
+            instruction="Extract all the items from the content.",
             chunk_token_threshold=1000,
             overlap_rate=0.1,
             apply_chunking=True,
             input_format="markdown",
-            extra_args={"temperature": 0.1, "max_tokens": 1000},
+            extra_args={"temperature": 0.0, "max_tokens": 800},
             verbose=True
         )
         self.crawl_config_post_page = CrawlerRunConfig(
@@ -69,9 +69,10 @@ class JobCrawler:
         self.dispatcher = MemoryAdaptiveDispatcher(
             memory_threshold_percent=70,
             check_interval=1,
-            max_session_permit=4
+            max_session_permit=3
         )
-    
+
+        self.logger.info(f"{JobCrawler.__name__} initiated.")
     
     async def crawl_search_pages(self, urls: list[str]):
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
@@ -88,11 +89,12 @@ class JobCrawler:
                         jobs_links.append(link["href"])
         
         self.logger.info(f"Total {len(jobs_links)} job page links crawled from {len(urls)} search pages.")
-        
+        self.logger.info(f"Job Links: \n%s", pformat(jobs_links, indent=2))
+                
         return jobs_links
    
  
-    async def crawl_post_pages(self, urls: list[str], keyword:str) -> None:
+    async def crawl_post_pages(self, urls: list[str], keyword: str) -> None:
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
             async for result in await crawler.arun_many(
                 urls=urls,
@@ -101,19 +103,28 @@ class JobCrawler:
             ):
             
                 if result.success:
+                    try:
+                        data = json.loads(result.extracted_content)[0]
+                    except Exception as e:
+                        self.logger.error(f"JSON Loading Error: {e}")
+                        data = {}
+                    if not data:
+                        self.logger.error(f"No data extracted from URL: {result.url}")
+                        continue
+                    
                     job_item = JobAd(
-                        id=result.url.split("?")[-1].split("/")[-1],
+                        id=result.url.split("?")[0].split("/")[-1],
                         url=result.url,
                         content=result.markdown,
                         keyword=keyword,
-                        job_title=result.extracted_data.job_title,
-                        company=result.extracted_data.company,
-                        responsibilities=result.extracted_data.responsibilities,
-                        qualifications=result.extracted_data.qualifications,
-                        experiences=result.extracted_data.experiences,
-                        skills=result.extracted_data.skills,
-                        salary=result.extracted_data.salary,
-                        working_location=result.extracted_data.working_location
+                        job_title=data.get("Job Title"), # .get() this way, missing fields don’t break your pipeline.
+                        company=data.get("Company"),
+                        responsibilities=data.get("Responsibilities"),
+                        qualifications=data.get("Qualifications"),
+                        experiences=data.get("Experiences"),
+                        skills=data.get("Skills"),
+                        salary=data.get("Salary"),
+                        working_location=data.get("Working Location")
                     )
                     self.db_handler.create_JobAd(job_item=job_item)
                     self.logger.info(f"JobAd: \n%s", pformat(job_item.model_dump(), indent=2))
