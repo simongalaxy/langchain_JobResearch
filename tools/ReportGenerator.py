@@ -1,85 +1,137 @@
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_ollama import ChatOllama
-from langchain_community.utilities.sql_database import SQLDatabase
-
-
-from tools.PostgresDatabase import PostgresDBHandler
-
+from pprint import pformat
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import ast
 
-class JobResearchReportGenerator:
-    """
-    A class to generate an analytical job research report from job data stored in DuckDB.
-    It uses Ollama (local LLM) via LangChain to query the database, extract insights,
-    and write a concise report based strictly on the data.
+from langchain_ollama import ChatOllama
+from langchain_community.utilities.sql_database import SQLDatabase
+from langchain_classic.prompts import PromptTemplate
 
-    Assumptions about your DuckDB schema:
-    - You have a table named 'jobs' (adjust if different).
-    - Relevant columns: job_title, company, responsibilities (text), qualifications (text),
-      experience (text or years), skills (text, possibly comma-separated or array),
-      salary (numeric or text range), location (text).
 
-    If your table/column names differ, update the PROMPT_TEMPLATE accordingly.
-    """
-    
-    def __init__(self, logger, Handler: PostgresDBHandler):
-        # Connect to DuckDB via LangChain's SQLDatabase (uses SQLAlchemy under the hood)
-        self.logger = logger
-        self.PsqlHandler = Handler
-        self.table_name = os.getenv("db_name")
+class ReportGenerator:
+    def __init__(self, logger):
         
-        # Ollama LLM (chat model for better structured responses)
-        self.llm = ChatOllama(
-            model=os.getenv("OLLAMA_LLM_MODEL"),
-            temperature=0,  # Low temperature for analytical/factual output
-        )
+        # declaring logger.
+        self.logger = logger
+        
+        # declare database connection parameters.
+        self.username = os.getenv("username")
+        self.password = os.getenv("password")
+        self.host = os.getenv("host")
+        self.port = os.getenv("port") 
+        self.db_name = os.getenv("db_name")
+        self.db_uri = f"postgresql+psycopg2://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+        self.db = SQLDatabase.from_uri(self.db_uri)
+        
+        # set up llm.
+        self.model_name = os.getenv("OLLAMA_LLM_MODEL")
+        self.llm = ChatOllama(model=self.model_name, temperature=0.7)
+        
+        # set up prompt template for report generation.
+        self.report_prompt = PromptTemplate(
+                input_variables=["insights"],
+                template="""
+                You are generating a job market research report.
 
-        # Comprehensive prompt that guides the LLM to extract all required insights in one go
-        self.PROMPT_TEMPLATE = f"""
-        You are an expert job market analyst. Using only the data from the provided SQL query results,
-        produce a concise, analytical job research report in clear paragraphs.
+                Use ONLY the data provided in the JSON input. 
+                Do NOT invent job titles, responsibilities, skills, qualifications, or experiences that are not explicitly present in the input.
 
-        Key requirements:
-        - Summarize overall hiring trends (e.g., most common job titles, dominant companies, locations).
-        - Highlight the most requested skills (top 5–10, with counts if possible).
-        - Identify experience level patterns (e.g., junior/mid/senior distribution, average years required).
-        - Mention salary ranges if salary data is available; otherwise state that salary information is unavailable.
-        - Keep the tone professional, analytical, and concise.
-        - Do NOT invent, assume, or hallucinate any data. Base everything strictly on the provided results.
-        - If certain information is missing or insufficient, explicitly state it (e.g., "Salary data is unavailable in the dataset").
-        - Structure the report with paragraphs, no bullet points or headings unless natural.
+                Your task:
+                1. Summarize the top job titles exactly as provided, preserving counts.
+                2. Identify the most common responsibilities, skills, qualifications, and experiences based strictly on frequency in the input.
+                3. Write a detailed and comprehensive analytical report that reflects the dataset, not general industry knowledge.
+                4. Avoid generic statements unless they are supported by the data.
+                5. Do not add job titles that are not in the input.
 
-        The dataset contains job advertisements in the table `{self.table_name}`.
+                Input data:
+                {insights}
 
-        Here are key analytical SQL query results (each section is labeled):
+                Output format (Markdown):
+                # Job Market Research Report
 
-        {{query_results}}
+                ## Top Job Titles
+                (List exactly as provided, with counts in descending order)
 
-        Write the final report now.
-        """
+                ## Key Responsibilities
+                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
 
-        self.prompt = PromptTemplate.from_template(self.PROMPT_TEMPLATE)
+                ## Common Skills
+                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
 
+                ## Common Qualifications
+                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
 
-    def generate_report(self, keyword: str) -> str:
-        """Generate and return the full job research report."""
-        query_results = self.DBHandler.gather_insights(keyword=keyword)
-        chain = self.prompt | self.llm | StrOutputParser()
-        report = chain.invoke({"query_results": query_results})
+                ## Common Experiences
+                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
 
-        return report
+                ## Insights & Trends
+                (Highlight patterns visible in the data only)
+                
+                ## Summary
+                (A short, factual conclusion)
+                """
+            )
+        
+        self.logger.info("Report Generator for keyword - {self.keyword} started.")
 
+    # Function to generate the report
+    def generate_job_market_report(self, keyword: str):
+        # Use agent to query DB for key insights (add more queries as needed)
+        
+        items = ["Job Title", "Responsiblities", "Skills", "Qualifications", "Experiences"]
+        queries = [
+                f"""
+                SELECT job_title, COUNT(id) AS count
+                FROM public.jobad
+                WHERE job_title IS NOT NULL
+                AND keyword = '{keyword}'
+                GROUP BY job_title
+                ORDER BY count DESC
+                LIMIT 5;
+                """,
+    
+                f"""
+                SELECT unnest(skills) AS element
+                FROM public.jobad
+                WHERE array_length(skills, 1) > 0
+                AND keyword = '{keyword}';
+                """,
 
-# # Example usage:
-# if __name__ == "__main__":
-#     generator = JobResearchReportGenerator(
-#         db_path="path/to/your/jobs.duckdb",  # Update with your actual file path
-#         table_name="jobs",                   # Update if your table has a different name
-#         ollama_model="llama3.2",             # Your pulled Ollama model
-#     )
+                f"""
+                SELECT unnest(qualifications) AS element
+                FROM public.jobad
+                WHERE array_length(qualifications, 1) > 0
+                AND keyword = '{keyword}';
+                """,
 
-#     report = generator.generate_report()
-#     print(report)
+                f"""
+                SELECT unnest(responsibilities) AS element
+                FROM public.jobad
+                WHERE array_length(responsibilities, 1) > 0
+                AND keyword = '{keyword}';
+                """,
+
+                f"""
+                SELECT unnest(experiences) AS element
+                FROM public.jobad
+                WHERE array_length(experiences, 1) > 0
+                AND keyword = '{keyword}';
+                """
+            ]
+
+        insights = {}
+        
+        for item, query in zip(items, queries):
+            result = self.db.run(query)
+            text = "\n".join(t[0] for t in ast.literal_eval(result) if t[0] is not None)
+            insights[item] = text
+
+        # self.logger.info(f"insights: \n%s", pformat(insights))
+        
+        # Chain to generate the full report using the prompt
+        report_chain = self.report_prompt | self.llm  # Simple chain: prompt -> LLM
+        report = report_chain.invoke({"insights": insights})
+        
+        return report.content  # Or report if using other LLM output format
+
