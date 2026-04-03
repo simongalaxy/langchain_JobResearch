@@ -118,9 +118,14 @@ uv sync
 POSTGRES_URL=your_postgres_connection_string
 OLLAMA_MODEL=your_local_llm_model
 
+---
+
 ## Usage
 uv run main.py
 type the keyword(e.g. AI) for searching relevant jobs.
+
+---
+
 
 ## Example Output (Structured Data)
 { 'company': 'Wafer Systems Limited',
@@ -255,6 +260,8 @@ type the keyword(e.g. AI) for searching relevant jobs.
   'url': 'https://hk.jobsdb.com/job/90769840?type=standard',
   'working_location': None}
 
+---
+
 ## Sample Report
 Based on the provided data, here is a summary of the job market research report:
 
@@ -315,3 +322,5 @@ Based on the provided data, here is a summary of the job market research report:
 
 ## Summary
 The job market research report highlights the growing demand for AI and machine learning professionals, as well as increasing importance of cloud computing and data analysis. Product management and business analysis roles are also on the rise, while sales performance analysis and marketing specialist roles continue to expand. Software development and technical expertise remain in high demand, particularly with a focus on cloud platforms and programming languages like Python and Java.
+
+---
