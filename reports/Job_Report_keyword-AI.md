@@ -1,95 +1,59 @@
+Here is the output in Markdown format:
+
 # Job Market Research Report
 
-## Top Job Titles
-1. **Senior Manager** (22)
-2. **Manager** (15)
-3. **Data Architect** (12)
-4. **IT Manager** (10)
-5. **Business Analyst** (9)
-6. **Software Developer** (8)
-7. **Data Scientist** (7)
-8. **AI/ML Engineer** (6)
-9. **DevOps Engineer** (5)
-10. **Project Manager** (5)
+## Top 10 Job Titles
+1. **Software Engineer** (8)
+2. **Data Scientist** (7)
+3. **AI/ML Developer** (6)
+4. **Data Architect** (5)
+5. **Business Analyst** (5)
+6. **IT Project Manager** (4)
+7. **Cybersecurity Specialist** (4)
+8. **Cloud Engineer** (4)
+9. **DevOps Engineer** (3)
+10. **Account Manager** (3)
 
 ## Key Responsibilities
-### Category: Operations Management
-1. Manage teams of developers and analysts.
-2. Ensure project delivery timelines and budgets.
-3. Coordinate with stakeholders to understand project requirements.
-4. Develop and implement process improvements.
+### **Data Science & AI**
+* Develop and deploy predictive models and analytical frameworks that drive business value (Data Scientist, 5)
+* Analyze social media data or work with social listening tools (Business Analyst, 4)
+* Experience in leading enterprise-grade Proof of Concept (PoC) projects (Cloud Engineer, 3)
 
-### Category: Data Analysis
-1. Analyze large datasets to identify trends and insights.
-2. Create data visualizations to communicate findings.
-3. Develop predictive models using machine learning algorithms.
-4. Ensure data quality and integrity.
+### **Software Development**
+* Build full-stack web applications using Next.js and React (Software Engineer, 8)
+* Develop AI features using Python-based programs (IT Project Manager, 5)
+* Hands-on experience with social media management (Account Manager, 3)
 
-### Category: Software Development
-1. Design, develop, and test software applications.
-2. Collaborate with cross-functional teams to deliver projects.
-3. Implement agile development methodologies.
-4. Participate in code reviews and ensure high-quality code.
-
-### Category: Artificial Intelligence/Machine Learning
-1. Develop and deploy AI/ML models using machine learning algorithms.
-2. Ensure data quality and integrity for model training.
-3. Collaborate with stakeholders to understand project requirements.
-4. Implement model monitoring and maintenance procedures.
+### **Cloud & Security**
+* Experience in deploying or managing cloud-based contact center solutions (Cybersecurity Specialist, 4)
+* Familiarity with cloud platforms like AWS, GCP, or Alibaba Cloud (DevOps Engineer, 3)
+* Hands-on expertise in cloud infrastructure, networking, servers, storage, virtualization, and enterprise security technologies (Cloud Engineer, 4)
 
 ## Common Skills
-### Category: Programming Languages
-1. Python (35)
-2. Java (25)
-3. C++ (20)
-4. JavaScript (15)
-5. R (10)
+### **Programming Languages**
+* Python (Data Scientist, 5; AI/ML Developer, 6; Business Analyst, 4; Cloud Engineer, 4)
+* JavaScript (Software Engineer, 8; Account Manager, 3)
 
-### Category: Data Analysis Tools
-1. Tableau (30)
-2. Power BI (25)
-3. Excel (20)
-4. SQL (15)
-5. pandas (10)
-
-### Category: Cloud Platforms
-1. AWS (40)
-2. Azure (30)
-3. GCP (20)
-4. Docker (15)
-5. Kubernetes (10)
+### **AI & Machine Learning**
+* Experience in developing RAG models, working with vector databases, prompt engineering, and fine-tuning large language models (Data Scientist, 5)
+* Familiarity with AI frameworks like TensorFlow or PyTorch (Business Analyst, 4)
 
 ## Common Qualifications
-### Category: Education
-1. Bachelor's degree (50)
-2. Master's degree (25)
-3. Ph.D. (10)
-4. Online courses or certifications (5)
+### **Education**
+* Master's degree or above in related field (Data Scientist, 5; Business Analyst, 5)
 
-### Category: Experience
-1. 2-5 years of experience (40)
-2. 6-10 years of experience (30)
-3. 11+ years of experience (20)
+### **Experience**
+* At least 2 years of experience in industry research and sales support (Account Manager, 3)
+* Proven track record of delivering measurable business impact (Data Scientist, 5)
 
 ## Common Experiences
-### Category: Industry Research
-1. Conducting market research for sales support.
-2. Analyzing social media data to understand customer behavior.
-
-### Category: Sales Support
-1. Working with stakeholders to understand project requirements.
-2. Collaborating with cross-functional teams to deliver projects.
-
-### Category: Education
-1. Teaching or curriculum development experience in higher education.
-2. Research and development experience in AI, Robotics, and Automation.
+### **Industry Research & Development**
+* Experience in teaching or curriculum development in higher education (Data Scientist, 5; Business Analyst, 4)
+* R&D experience in Construction AI, Robotics, and Automation (IT Project Manager, 5)
 
 ## Insights & Trends
-- The top job titles indicate a growing demand for senior management, data architects, IT managers, business analysts, software developers, data scientists, AI/ML engineers, DevOps engineers, and project managers.
-- Operations management, data analysis, software development, artificial intelligence/machine learning, and cloud platforms are the most common categories of responsibilities.
-- Python, Java, C++, JavaScript, and R are the most commonly used programming languages.
-- Tableau, Power BI, Excel, SQL, and pandas are widely used in data analysis tools.
-- AWS, Azure, GCP, Docker, Kubernetes, and other cloud platforms are frequently used.
+The top job titles suggest a growing demand for professionals with expertise in data science, AI/ML, cloud engineering, cybersecurity, and software development. The common skills across these roles highlight the importance of programming languages, AI frameworks, and machine learning.
 
 ## Summary
-The job market research report highlights key trends and insights from the dataset. The top job titles indicate a growing demand for senior management, data architects, IT managers, business analysts, software developers, data scientists, AI/ML engineers, DevOps engineers, and project managers. Operations management, data analysis, software development, artificial intelligence/machine learning, and cloud platforms are common categories of responsibilities. Python, Java, C++, JavaScript, and R are popular programming languages, while Tableau, Power BI, Excel, SQL, and pandas are widely used in data analysis tools. AWS, Azure, GCP, Docker, Kubernetes, and other cloud platforms are frequently used.
+The job market research report highlights key trends and insights into the top 10 job titles, common responsibilities, skills, qualifications, and experiences. These findings can help inform career choices and hiring strategies in industries that require expertise in data science, AI/ML, cloud engineering, cybersecurity, and software development.

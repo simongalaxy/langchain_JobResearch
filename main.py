@@ -29,12 +29,12 @@ def main():
             break
         logger.info(f"keyword input: {keyword}")
         
-        # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
-        total_search_pages = 10
-        crawler.crawl_all_job_pages(
-            keyword=keyword, 
-            total_pages=total_search_pages
-        )
+        # # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
+        # total_search_pages = 10
+        # crawler.crawl_all_job_pages(
+        #     keyword=keyword, 
+        #     total_pages=total_search_pages
+        # )
         
         # generate report.
         report = Generator.generate_job_market_report(keyword=keyword)

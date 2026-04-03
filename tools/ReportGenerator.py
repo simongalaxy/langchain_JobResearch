@@ -38,8 +38,8 @@ class ReportGenerator:
                 Do NOT invent job titles, responsibilities, skills, qualifications, or experiences that are not explicitly present in the input.
 
                 Your task:
-                1. Summarize the top job titles exactly as provided, preserving counts.
-                2. Identify the most common responsibilities, skills, qualifications, and experiences based strictly on frequency in the input.
+                1. Summarize the top 15 job titles exactly as provided, preserving counts.
+                2. Identify top 15 most common responsibilities, skills, qualifications, and experiences based strictly on frequency in the input.
                 3. Write a detailed and comprehensive analytical report that reflects the dataset, not general industry knowledge.
                 4. Avoid generic statements unless they are supported by the data.
                 5. Do not add job titles that are not in the input.
@@ -50,23 +50,23 @@ class ReportGenerator:
                 Output format (Markdown):
                 # Job Market Research Report
 
-                ## Top Job Titles
+                ## Top 15 Job Titles
                 (List exactly as provided, with counts in descending order)
 
                 ## Key Responsibilities
-                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
+                (Categorize and summarize based on top 15 frequency with at least 5 examples for each categories; no invented items; Only from the dataset)
 
                 ## Common Skills
-                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
+                (Categorize and summarize based on top 15 frequency with at least 5 examples for each categories; no invented items; Only from the dataset)
 
                 ## Common Qualifications
-                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
+                (Categorize and summarize based on top 15 frequency with at least 5 examples for each categories; no invented items; Only from the dataset)
 
                 ## Common Experiences
-                (Categorize and summarize based on top 10 frequency with at least 4 to 5 examples by categories; no invented items; Only from the dataset)
+                (Categorize and summarize based on top 15 frequency with at least 5 examples for each categories; no invented items; Only from the dataset)
 
                 ## Insights & Trends
-                (Highlight patterns visible in the data only)
+                (Highlight 5 patterns visible in the data only)
                 
                 ## Summary
                 (A short, factual conclusion)
