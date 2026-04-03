@@ -95,11 +95,10 @@ Langchain_JobResearch/
 ## 🚀 How It Works
 
 1. **Crawl job advertisement webpages** using Crawl4AI  
-2. **Extract structured data** using LLMs (via LangChain + Ollama)  
+2. **Extract structured data** using LLMs (via Crawl4AI + Ollama)  
 3. **Validate data** with Pydantic models  
 4. **Store results** in PostgreSQL  
-5. **Generate insights and reports** using LLMs  
-6. **Export or analyze** the structured dataset  
+5. **Generate insights and reports** using LLMs with LangChain
 
 ---
 
@@ -118,8 +117,6 @@ uv sync
 POSTGRES_URL=your_postgres_connection_string
 OLLAMA_MODEL=your_local_llm_model
 
----
-
 ## Usage
 uv run main.py
 type the keyword(e.g. AI) for searching relevant jobs.
@@ -127,7 +124,8 @@ type the keyword(e.g. AI) for searching relevant jobs.
 ---
 
 
-## Example Output (Structured Data)
+## 🚀 How It Works
+
 { 'company': 'Wafer Systems Limited',
   'content': '# Sales Manager (AI Solutions)\n'
              '**Headcount opening**\n'
