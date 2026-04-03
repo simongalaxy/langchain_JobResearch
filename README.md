@@ -102,11 +102,10 @@ Langchain_JobResearch/
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Installation and Usage
 
 Clone the repository:
 
-```bash
 git clone https://github.com/yourusername/Langchain_JobResearch.git
 cd Langchain_JobResearch
 
@@ -124,7 +123,7 @@ type the keyword(e.g. AI) for searching relevant jobs.
 ---
 
 
-## 🚀 How It Works
+## 🚀 Sample Structured Output.
 
 { 'company': 'Wafer Systems Limited',
   'content': '# Sales Manager (AI Solutions)\n'
@@ -260,7 +259,9 @@ type the keyword(e.g. AI) for searching relevant jobs.
 
 ---
 
-## Sample Report
+## Sample Report Generated.
+
+
 Based on the provided data, here is a summary of the job market research report:
 
 # Top 15 Job Titles
