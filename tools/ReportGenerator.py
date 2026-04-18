@@ -25,7 +25,7 @@ class ReportGenerator:
         self.db = SQLDatabase.from_uri(self.db_uri)
         
         # set up llm.
-        self.model_name = os.getenv("OLLAMA_LLM_MODEL")
+        self.model_name = os.getenv("OLLAMA_MODEL")
         self.llm = ChatOllama(model=self.model_name, temperature=0.7)
         
         # set up prompt template for report generation.

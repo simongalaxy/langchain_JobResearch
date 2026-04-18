@@ -1,6 +1,7 @@
 from tools.logger import Logger
-from tools.JobCrawler import JobCrawler
-from tools.PostgresDatabase import PostgresDBHandler
+from tools.webCrawler import WebCrawler
+from tools.JobSummarizer import JobSummarizer
+from tools.DBHandler import DBHandler
 from tools.ReportGenerator import ReportGenerator
 from tools.writeReport import write_report
 
@@ -15,36 +16,46 @@ load_dotenv()
 def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
-    PsqlHandler = PostgresDBHandler(logger=logger)
-    PsqlHandler.check_and_create_table()
-    crawler = JobCrawler(logger=logger, db_handler=PsqlHandler)
-    Generator = ReportGenerator(logger=logger)
+    crawler = WebCrawler(logger=logger)
+    summarizer = JobSummarizer(logger=logger)
+    dbhandler = DBHandler(logger=logger)
+    # Generator = ReportGenerator(logger=logger)
     
     # chat loop.
     while True:
-        keyword = input("Enter your keyword to search jobs (or type 'q' for quit): ")
+        query = input("Enter your keyword to search jobs (or type 'q' for quit): ")
         
-        if keyword.lower() == 'q':
+        if query.lower() == 'q':
             logger.info("User exited the application.")
             break
-        logger.info(f"keyword input: {keyword}")
         
-        # # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
-        # total_search_pages = 10
-        # crawler.crawl_all_job_pages(
-        #     keyword=keyword, 
-        #     total_pages=total_search_pages
-        # )
+        # must convert query to a string in format "text-text-text" before searching.
+        keyword = query.replace(" ", "-")
+        logger.info(f"query input: {query}, keyword: {keyword}")
+        
+        # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
+        total_search_pages = 1
+        job_results = crawler.crawl_all_job_pages(
+            keyword=keyword, 
+            total_pages=total_search_pages
+        )
+        
+        # Extract information from job ads.
+        job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
+
+        # save data to postgresql.
+        for job in job_infos:
+            dbhandler.insert_job(job_item=job)
         
         # generate report.
-        report = Generator.generate_job_market_report(keyword=keyword)
-        logger.info(f"Generated Report:\n{report}")
+        # report = Generator.generate_job_market_report(keyword=keyword)
+        # logger.info(f"Generated Report:\n{report}")
         
-        # save the report in text file.
-        write_report(
-            keyword=keyword,
-            markdown=report
-        )
+        # # save the report in text file.
+        # write_report(
+        #     keyword=keyword,
+        #     markdown=report
+        # )
        
     return
 

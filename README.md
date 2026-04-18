@@ -73,11 +73,15 @@ LLMs *can* — and this project uses them in a controlled, typed, and production
 
 Langchain_JobResearch/
 │
+├── logs/                      # save the log files
+├── reports/                   # save report generated. 
 ├── tools/
 │   ├── init.py
-│   ├── JobCrawler.py          # Crawl job ads using Crawl4AI
 │   ├── logger.py              # Logging utilities
-│   ├── PostgresDatabase.py    # Database connection + CRUD
+│   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
+│   ├── WebCrawler.py          # Crawl job ads using Crawl4AI
+│   ├── JobSummarizer.py       # LLM-based job ad information extractor
+│   ├── DBHandler.py           # Postgresql Database connection + CRUD
 │   ├── writeReport.py         # Write insights to file
 │   └── ReportGenerator.py     # LLM-based insights generation
 │
@@ -95,10 +99,10 @@ Langchain_JobResearch/
 ## 🚀 How It Works
 
 1. **Crawl job advertisement webpages** using Crawl4AI  
-2. **Extract structured data** using LLMs (via Crawl4AI + Ollama)  
+2. **Extract structured data** using LLMs (via Ollama)  
 3. **Validate data** with Pydantic models  
 4. **Store results** in PostgreSQL  
-5. **Generate insights and reports** using LLMs with LangChain
+5. **Generate insights and reports** using LLMs with LangChain and Ollama
 
 ---
 
