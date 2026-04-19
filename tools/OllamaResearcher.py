@@ -36,7 +36,7 @@ class OllamaResearcher:
         self.model_name = os.getenv("OLLAMA_SUMMARIZATION_MODEL")
         self.client = Client()   # or AsyncClient() if you want async
 
-        self.logger.info(f"ReportGenerator initialized with model: {self.model_name}")
+        self.logger.info(f"Ollama Researcher initialized with model: {self.model_name}")
 
 
     def _get_top_job_titles(self, keyword: str, limit: int = 15):

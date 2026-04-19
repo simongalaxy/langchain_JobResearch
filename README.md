@@ -115,7 +115,7 @@ uv sync
 ## Set up your .env file:
 POSTGRES_URL=your_postgres_connection_string
 OLLAMA_EXTRACTION_MODEL = your_ollama_llm_model # recommend to use nuextract:latest
-OLLAMA_SUMMARIZATION_MODEL = your_ollama_llm_model # recommend to use phi4:latest
+OLLAMA_SUMMARIZATION_MODEL = your_ollama_llm_model # recommend to use phi4-mini:latest
 
 ## Usage
 uv run main.py

@@ -20,7 +20,7 @@ class OllamaSummarizer:
             raise ValueError("OLLAMA_EXTRACTION_MODEL not set in .env file")
         
         self.client = AsyncClient()
-        self.logger.info(f"JobSummarizer initialized with model: {self.model_name}")
+        self.logger.info(f"Ollama Summarizer initialized with model: {self.model_name}")
 
     async def _summarize_job_info(self, result: CrawlResult, keyword: str) -> JobInfo:
         url = result.url
