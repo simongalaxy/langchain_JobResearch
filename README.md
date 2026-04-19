@@ -45,14 +45,10 @@ LLMs *can* — and this project uses them in a controlled, typed, and production
 - Integrates with LLMs for extraction  
 - Fast and reliable for large‑scale scraping  
 
-### 🔗 LangChain
-- Provides a clean interface to communicate with LLMs  
-- Handles prompts, models, and structured output  
-
 ### 🦙 Ollama
 - Runs LLMs locally for **privacy** and **zero cost**  
-- Extracts structured data from unstructured text  
-- Generates insights and reports  
+- Extracts structured data from unstructured text with asyncio to speed up the extraction process.
+- Generates insights and reports
 
 ### 🐘 PostgreSQL
 - Stores extracted job data  
@@ -80,10 +76,10 @@ Langchain_JobResearch/
 │   ├── logger.py              # Logging utilities
 │   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
 │   ├── WebCrawler.py          # Crawl job ads using Crawl4AI
-│   ├── JobSummarizer.py       # LLM-based job ad information extractor
+│   ├── OllamaSummarizer.py    # LLM-based job ad information extractor using Ollama
 │   ├── DBHandler.py           # Postgresql Database connection + CRUD
-│   ├── writeReport.py         # Write insights to file
-│   └── ReportGenerator.py     # LLM-based insights generation
+│   ├── writeReport.py         # Write insights to markdown file
+│   └── OllamaResearch.py      # LLM-based insights report generation using Ollama
 │
 ├── main.py                    # Main entry point
 ├── .env                       # Environment variables
@@ -99,10 +95,10 @@ Langchain_JobResearch/
 ## 🚀 How It Works
 
 1. **Crawl job advertisement webpages** using Crawl4AI  
-2. **Extract structured data** using LLMs (via Ollama)  
+2. **Extract structured data** using LLMs with Ollama
 3. **Validate data** with Pydantic models  
 4. **Store results** in PostgreSQL  
-5. **Generate insights and reports** using LLMs with LangChain and Ollama
+5. **Generate insights and reports** using LLMs with Ollama
 
 ---
 
@@ -118,7 +114,8 @@ uv sync
 
 ## Set up your .env file:
 POSTGRES_URL=your_postgres_connection_string
-OLLAMA_MODEL=your_local_llm_model
+OLLAMA_EXTRACTION_MODEL = your_ollama_llm_model # recommend to use nuextract:latest
+OLLAMA_SUMMARIZATION_MODEL = your_ollama_llm_model # recommend to use phi4:latest
 
 ## Usage
 uv run main.py

@@ -1,9 +1,8 @@
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
-from tools.JobSummarizer import JobSummarizer
+from tools.OllamaSummarizer import OllamaSummarizer
 from tools.DBHandler import DBHandler
-from tools.ReportGenerator import ReportGenerator
-from tools.writeReport import write_report
+from tools.OllamaResearcher import OllamaResearcher
 
 from pprint import pformat
 import os
@@ -17,9 +16,10 @@ def main():
     # initiate classes: logger, webcrawler, DuckDBHandler.
     logger = Logger(__name__).get_logger()
     crawler = WebCrawler(logger=logger)
-    summarizer = JobSummarizer(logger=logger)
+    summarizer = OllamaSummarizer(logger=logger)
     dbhandler = DBHandler(logger=logger)
-    # Generator = ReportGenerator(logger=logger)
+    dbhandler.create_table()
+    researcher = OllamaResearcher(logger=logger)
     
     # chat loop.
     while True:
@@ -34,7 +34,7 @@ def main():
         logger.info(f"query input: {query}, keyword: {keyword}")
         
         # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
-        total_search_pages = 1
+        total_search_pages = 5
         job_results = crawler.crawl_all_job_pages(
             keyword=keyword, 
             total_pages=total_search_pages
@@ -48,14 +48,7 @@ def main():
             dbhandler.insert_job(job_item=job)
         
         # generate report.
-        # report = Generator.generate_job_market_report(keyword=keyword)
-        # logger.info(f"Generated Report:\n{report}")
-        
-        # # save the report in text file.
-        # write_report(
-        #     keyword=keyword,
-        #     markdown=report
-        # )
+        researcher.generate_job_market_report(keyword=keyword)
        
     return
 
