@@ -1,9 +1,27 @@
-# 🧠 Job Research AI — Automated Job Ad Extraction & Insights
-
-A fully automated pipeline that crawls job advertisement webpages, extracts structured information using LLMs, and generates insights and reports.  
-Built for fast, accurate, and scalable analysis of job market trends.
+# 🧠 AI‑Powered Job Research Pipeline  
+High‑performance async pipeline for crawling, extracting, analyzing, and summarizing job postings using lightweight Ollama models and PostgreSQL JSONB storage.
 
 ---
+
+## 🚀 Overview
+
+This project is a fully asynchronous, modular job‑research system designed for **speed**, **clarity**, and **maintainability**.  
+It crawls job postings, extracts structured information, generates insights, and stores everything in PostgreSQL using a clean Pydantic‑based architecture.
+
+Key design principles:
+- **No ORM overhead** → direct PostgreSQL JSONB  
+- **No LangChain** → direct Ollama calls for maximum speed  
+- **No class overlap** → strict separation of concerns  
+- **Async end‑to‑end** → fast, scalable pipeline  
+- **Pydantic state models** → clean, typed, validated data flow  
+
+---
+
+## 🧩 Architecture
+
+The system follows a lightweight, LangGraph‑inspired state‑based design:
+
+
 
 ## 🌟 Motivation
 
@@ -63,7 +81,39 @@ LLMs *can* — and this project uses them in a controlled, typed, and production
 - Enables concurrent crawling and extraction  
 - Significantly speeds up processing time  
 
+
 ---
+
+## 🧠 Model Selection
+
+This project uses two lightweight Ollama models with clear functional separation:
+
+### **1. nuextract — Structured Extraction**
+- Optimized for extracting structured fields from unstructured job descriptions  
+- Low latency, low token usage  
+- JSON‑friendly output  
+- Perfect for:  
+  - job title  
+  - company  
+  - skills  
+  - responsibilities  
+  - requirements  
+
+### **2. phi4:mini — Reasoning & Report Generation**
+- Small model with strong reasoning  
+- Fast summarization  
+- Ideal for generating:  
+  - job summaries  
+  - insights  
+  - skill analysis  
+  - market‑fit reports  
+
+**Why this combination?**  
+Extraction and reasoning are different tasks.  
+Using two specialized models is **faster, more accurate, and more predictable** than using one large model.
+
+---
+
 
 ## 📁 Project Structure
 
@@ -76,10 +126,10 @@ Langchain_JobResearch/
 │   ├── logger.py              # Logging utilities
 │   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
 │   ├── WebCrawler.py          # Crawl job ads using Crawl4AI
-│   ├── OllamaSummarizer.py    # LLM-based job ad information extractor using Ollama
+│   ├── OllamaSummarizer.py    # LLM-based job ad information extractor using Ollama LLM Model - nuextract
 │   ├── DBHandler.py           # Postgresql Database connection + CRUD
 │   ├── writeReport.py         # Write insights to markdown file
-│   └── OllamaResearch.py      # LLM-based insights report generation using Ollama
+│   └── OllamaResearcher.py      # LLM-based insights report generation using Ollama LLM Model - phi4:mini
 │
 ├── main.py                    # Main entry point
 ├── .env                       # Environment variables
@@ -88,7 +138,27 @@ Langchain_JobResearch/
 ├── uv.lock
 └── README.md
 
+---
 
+## 🏗️ Main Components
+
+### WebCrawler
+- Async Playwright‑based crawling
+- Timeout + retry watchdog
+- Outputs CrawlResult (Pydantic)
+
+### OllamaSummarizer
+- Uses nuextract for structured extraction
+- Outputs ExtractedData (Pydantic)
+
+### OllamaResearcher
+- Uses phi4:mini for summarization & insights
+- Outputs Text file in markdown format
+
+### DBHandler
+- Direct PostgreSQL
+- No ORM
+- Fast, flexible, schema‑light
 
 ---
 
@@ -112,10 +182,14 @@ cd Langchain_JobResearch
 # install dependences
 uv sync
 
+# pull ollama LLM models
+ollama pull nuextract
+ollama pull phi4-mini
+
 ## Set up your .env file:
 POSTGRES_URL=your_postgres_connection_string
-OLLAMA_EXTRACTION_MODEL = your_ollama_llm_model # recommend to use nuextract:latest
-OLLAMA_SUMMARIZATION_MODEL = your_ollama_llm_model # recommend to use phi4-mini:latest
+OLLAMA_EXTRACTION_MODEL = nuextract:latest
+OLLAMA_SUMMARIZATION_MODEL = phi4-mini:latest
 
 ## Usage
 uv run main.py
@@ -123,3 +197,10 @@ type the keyword(e.g. AI) for searching relevant jobs.
 
 ---
 
+## 📌 Performance Notes
+- Crawl4AI / Playwright may occasionally freeze under heavy load
+- A retry + timeout wrapper is included to ensure stability
+- Async Ollama calls significantly reduce LLM latency
+- Removing ORM + LangChain reduces overhead and improves throughput
+
+---
