@@ -78,11 +78,11 @@ class OllamaResearcher:
 
         try:
             # 1. Fetch data efficiently
-            job_titles = self._get_top_job_titles(keyword, 15)
-            skills = self._get_top_items(keyword, "skills", 20)
+            job_titles = self._get_top_job_titles(keyword, 10)
+            skills = self._get_top_items(keyword, "skills", 10)
             responsibilities = self._get_top_items(keyword, "responsibilities", 20)
-            qualifications = self._get_top_items(keyword, "qualifications", 15)
-            experiences = self._get_top_items(keyword, "experiences", 15)
+            qualifications = self._get_top_items(keyword, "qualifications", 5)
+            experiences = self._get_top_items(keyword, "experiences", 5)
 
             total_jobs = sum(row["count"] for row in job_titles)
 

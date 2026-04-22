@@ -9,6 +9,7 @@ logs/
 .vscode/
 database/
 old/
+reports/
 
 # Virtual environments
 .venv

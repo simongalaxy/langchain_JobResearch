@@ -27,6 +27,7 @@ class DBHandler:
         self.conn.autocommit = True
         
         self.logger.info(f"DBHandler initialized and connected to {self.db_name}")
+        self.create_table()
 
     def create_table(self) -> None:
         create_table_query = """

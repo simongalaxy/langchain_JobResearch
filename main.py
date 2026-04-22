@@ -18,7 +18,7 @@ def main():
     crawler = WebCrawler(logger=logger)
     summarizer = OllamaSummarizer(logger=logger)
     dbhandler = DBHandler(logger=logger)
-    dbhandler.create_table()
+    # dbhandler.create_table()
     researcher = OllamaResearcher(logger=logger)
     
     # chat loop.
@@ -28,24 +28,24 @@ def main():
         if query.lower() == 'q':
             logger.info("User exited the application.")
             break
-        total_search_pages = input("How many search pages to crawl? ")
+        # total_search_pages = input("How many search pages to crawl? ")
         # must convert query to a string in format "text-text-text" before searching.
         keyword = query.replace(" ", "-")
         logger.info(f"query input: {query}, keyword: {keyword}")
         
-        # # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
+        # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
         
-        job_results = crawler.crawl_all_job_pages(
-            keyword=keyword, 
-            total_pages=int(total_search_pages)
-        )
+        # job_results = crawler.crawl_all_job_pages(
+        #     keyword=keyword, 
+        #     total_pages=int(total_search_pages)
+        # )
         
-        # Extract information from job ads.
-        job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
+        # # Extract information from job ads.
+        # job_infos = asyncio.run(summarizer.summarize_all_jobs(results=job_results, keyword=keyword))
 
-        # save data to postgresql.
-        for job in job_infos:
-            dbhandler.insert_job(job_item=job)
+        # # save data to postgresql.
+        # for job in job_infos:
+        #     dbhandler.insert_job(job_item=job)
         
         # generate report.
         researcher.generate_job_market_report(keyword=keyword)
