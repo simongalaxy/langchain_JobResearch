@@ -122,13 +122,11 @@ Langchain_JobResearch/
 ├── logs/                      # save the log files
 ├── reports/                   # save report generated. 
 ├── tools/
-│   ├── init.py
 │   ├── logger.py              # Logging utilities
 │   ├── DataClass.py           # Define pydantic classes to store data in different stages with validation
-│   ├── WebCrawler.py          # Crawl job ads using Crawl4AI
+│   ├── webCrawler.py          # Crawl job ads using Crawl4AI
 │   ├── OllamaSummarizer.py    # LLM-based job ad information extractor using Ollama LLM Model - nuextract
 │   ├── DBHandler.py           # Postgresql Database connection + CRUD
-│   ├── writeReport.py         # Write insights to markdown file
 │   └── OllamaResearcher.py      # LLM-based insights report generation using Ollama LLM Model - phi4:mini
 │
 ├── main.py                    # Main entry point
@@ -143,7 +141,7 @@ Langchain_JobResearch/
 ## 🏗️ Main Components
 
 ### WebCrawler
-- Async Playwright‑based crawling
+- Async Playwright‑based Crawl4AI
 - Timeout + retry watchdog
 - Outputs CrawlResult (Pydantic)
 
