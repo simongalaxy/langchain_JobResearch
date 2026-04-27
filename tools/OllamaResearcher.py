@@ -2,12 +2,15 @@ from ollama import Client   # Native Ollama client
 import psycopg2
 import psycopg2.extras
 from pprint import pformat
+from pathlib import Path
+import textwrap
+from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from tools.writeReport import write_report
+# from tools.writeReport import write_report
 
 class OllamaResearcher:
     def __init__(self, logger):
@@ -73,6 +76,20 @@ class OllamaResearcher:
             return cur.fetchall()
 
 
+    def _write_report(self, keyword: str, markdown: str) -> None:
+        
+        # generate filename by daily press release url.
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"Job_Report_keyword-{keyword}_{ts}.md"
+        filepath = "./reports/"
+        
+        # generate report in text file.
+        with open(os.path.join(filepath, filename), "w", encoding="utf-8") as file:
+            file.write(markdown + "\n")
+            
+        return
+
+
     def generate_job_market_report(self, keyword: str) -> None:
         self.logger.info(f"Generating job market report for keyword: '{keyword}'")
 
@@ -129,10 +146,10 @@ class OllamaResearcher:
             )
 
             report_text = response['message']['content']
-            write_report(keyword=keyword, markdown=report_text)
             self.logger.info("#"*50)
             self.logger.info("Report generated: \n%s", report_text)
             self.logger.info("#"*50)
+            self._write_report(keyword=keyword, markdown=report_text)
             
             return
 

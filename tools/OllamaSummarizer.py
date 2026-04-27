@@ -61,14 +61,8 @@ class OllamaSummarizer:
                 url=url,
                 content=content,
                 keyword=keyword,
-                job_title=extracted.job_title.strip(),
-                company=extracted.company,
-                responsibilities=extracted.responsibilities,
-                qualifications=extracted.qualifications,
-                experiences=extracted.experiences,
-                skills=extracted.skills,
-                salary=extracted.salary,
-                working_location=extracted.working_location,
+                job_info=extracted,
+                embedding=None,   # To be filled later
             )
 
             self.logger.info("Successfully extracted job: \n%s", pformat(job_info.model_dump(), indent=4))
@@ -84,14 +78,17 @@ class OllamaSummarizer:
                 url=url,
                 content=content,
                 keyword=keyword,
-                job_title=None,
-                company=None,
-                responsibilities=None,
-                qualifications=None,
-                experiences=None,
-                skills=None,
-                salary=None,
-                working_location=None,
+                job_info=ExtractedJobInfo(
+                    job_title=None,
+                    company=None,
+                    responsibilities=None,
+                    qualifications=None,
+                    experiences=None,
+                    skills=None,
+                    salary=None,
+                    working_location=None,
+                ),
+                embedding=None,
             )
 
     async def summarize_all_jobs(self, results: List[CrawlResult], keyword: str) -> List[JobInfo]:

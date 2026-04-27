@@ -86,14 +86,14 @@ class DBHandler:
             job_item.url,
             job_item.content,
             job_item.keyword,
-            job_item.job_title,
-            job_item.company,
-            job_item.responsibilities,
-            job_item.qualifications,
-            job_item.experiences,
-            job_item.skills,
-            job_item.salary,
-            job_item.working_location,
+            job_item.job_info.job_title,
+            job_item.job_info.company,
+            job_item.job_info.responsibilities,
+            job_item.job_info.qualifications,
+            job_item.job_info.experiences,
+            job_item.job_info.skills,
+            job_item.job_info.salary,
+            job_item.job_info.working_location,
         )
 
         try:

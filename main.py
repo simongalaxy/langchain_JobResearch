@@ -1,6 +1,7 @@
 from tools.logger import Logger
 from tools.webCrawler import WebCrawler
 from tools.OllamaSummarizer import OllamaSummarizer
+from old.EmbeddingGenerator import EmbeddingGenerator
 from tools.DBHandler import DBHandler
 from tools.OllamaResearcher import OllamaResearcher
 
@@ -30,7 +31,6 @@ def main():
         total_search_pages = input("How many search pages to crawl? ")
         # must convert query to a string in format "text-text-text" before searching.
         keyword = query.replace(" ", "-")
-        logger.info(f"query input: {query}, keyword: {keyword}")
         
         # crawl all job pages based on the keyword and save the extracted results to the postgresql database.
         job_results = crawler.crawl_all_job_pages(

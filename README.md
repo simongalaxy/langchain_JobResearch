@@ -88,16 +88,17 @@ LLMs *can* — and this project uses them in a controlled, typed, and production
 
 This project uses two lightweight Ollama models with clear functional separation:
 
-### **1. nuextract — Structured Extraction**
-- Optimized for extracting structured fields from unstructured job descriptions  
-- Low latency, low token usage  
-- JSON‑friendly output  
-- Perfect for:  
-  - job title  
-  - company  
-  - skills  
-  - responsibilities  
-  - requirements  
+### **1. MiniMistral‑3:3B — Inference‑Driven Summarization**
+- Designed for interpretive understanding of job descriptions
+- Strong at identifying implicit skills and experience not explicitly stated
+- Produces natural, narrative summaries instead of rigid JSON
+
+- Ideal for:
+  - summarizing required skills (explicit + inferred)
+  - summarizing experience level and role expectations
+  - extracting soft skills from context
+  - generating human‑readable job overviews
+
 
 ### **2. phi4:mini — Reasoning & Report Generation**
 - Small model with strong reasoning  
@@ -108,9 +109,11 @@ This project uses two lightweight Ollama models with clear functional separation
   - skill analysis  
   - market‑fit reports  
 
-**Why this combination?**  
-Extraction and reasoning are different tasks.  
-Using two specialized models is **faster, more accurate, and more predictable** than using one large model.
+***Why this combination?***  
+**Both MiniMistral‑3:3B and Phi‑4 Mini — Optimized for MLX Acceleration**
+- Both models run significantly faster when executed through Ollama with the MLX backend
+- MLX provides lower latency, better memory efficiency, and higher throughput on Apple Silicon
+- Ideal for high‑concurrency pipelines where you need fast inference without sacrificing quality
 
 ---
 
@@ -181,12 +184,12 @@ cd Langchain_JobResearch
 uv sync
 
 # pull ollama LLM models
-ollama pull nuextract
+ollama pull ministral-3:3b 
 ollama pull phi4-mini
 
 ## Set up your .env file:
 POSTGRES_URL=your_postgres_connection_string
-OLLAMA_EXTRACTION_MODEL = nuextract:latest
+OLLAMA_EXTRACTION_MODEL = ministral-3:3b
 OLLAMA_SUMMARIZATION_MODEL = phi4-mini:latest
 
 ## Usage
